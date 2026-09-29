@@ -173,7 +173,7 @@ export function buildWheel(w: Wheel, opts: { quality?: "high" | "low" } = {}): W
     const mat = keep(new THREE.MeshBasicMaterial({ color: 0x000000, toneMapped: false }));
     // every LED is a light on the face: button and encoder LEDs too (no caps or knobs drawn)
     const big = led.group === "buttons" || led.group === "encoders";
-    const mesh = new THREE.Mesh(keep(new THREE.SphereGeometry((big ? 11 : led.r * 1.05) * k, 24, 12)), mat);
+    const mesh = new THREE.Mesh(keep(new THREE.SphereGeometry((led.group === "encoders" ? 22 : big ? 11 : led.r * 1.05) * k, 24, 12)), mat);
     mesh.scale.z = 0.45;
     mesh.position.copy(toLocal(led.x, led.y, front + (big ? 0.004 : 0.072)));
     mesh.userData.index = led.i;
