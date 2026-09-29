@@ -160,9 +160,6 @@ export function buildWheel(w: Wheel, opts: { quality?: "high" | "low" } = {}): W
   // ----- LEDs -----
   const ledMeshes: THREE.Mesh[] = [];
   const ledMats: THREE.MeshBasicMaterial[] = [];
-  const capMat = keep(new THREE.MeshPhysicalMaterial({ color: 0x0c0d10, roughness: 0.35, metalness: 0.2, clearcoat: 0.8, clearcoatRoughness: 0.15 }));
-  const knurl = keep(knurlNormal()); knurl.repeat.set(6, 1);
-  const knobMat = keep(new THREE.MeshStandardMaterial({ color: 0x2c2f35, metalness: 0.9, roughness: 0.38, normalMap: knurl, normalScale: new THREE.Vector2(0.9, 0.9) }));
   const smoked = keep(new THREE.MeshPhysicalMaterial({ color: 0x120405, roughness: 0.1, transparent: true, opacity: 0.55, clearcoat: 1 }));
   const revLeds = w.groups.rev?.leds ?? [];
   if (revLeds.length) {
@@ -174,22 +171,11 @@ export function buildWheel(w: Wheel, opts: { quality?: "high" | "low" } = {}): W
   }
   for (const led of w.leds) {
     const mat = keep(new THREE.MeshBasicMaterial({ color: 0x000000, toneMapped: false }));
-    let mesh: THREE.Mesh;
-    if (led.group === "buttons" || led.group === "encoders") {
-      const enc = led.group === "encoders";
-      // the cap or knob, and the LED as a glowing ring around it
-      const r = led.r * k * (enc ? 1.05 : 1.15);
-      const body = new THREE.Mesh(keep(new THREE.CylinderGeometry(r * (enc ? 0.88 : 0.92), r, enc ? 0.11 : 0.07, 48)), enc ? knobMat : capMat);
-      body.rotation.x = Math.PI / 2;
-      body.position.copy(toLocal(led.x, led.y, front + (enc ? 0.055 : 0.035)));
-      group.add(body);
-      mesh = new THREE.Mesh(keep(new THREE.TorusGeometry(r * 1.06, r * 0.075, 12, 64)), mat);
-      mesh.position.copy(toLocal(led.x, led.y, front + 0.012));
-    } else {
-      mesh = new THREE.Mesh(keep(new THREE.SphereGeometry(led.r * k * 1.05, 20, 12)), mat);
-      mesh.scale.z = 0.45;
-      mesh.position.copy(toLocal(led.x, led.y, front + 0.072));
-    }
+    // every LED is a light on the face: button and encoder LEDs too (no caps or knobs drawn)
+    const big = led.group === "buttons" || led.group === "encoders";
+    const mesh = new THREE.Mesh(keep(new THREE.SphereGeometry((big ? 5.5 : led.r * 1.05) * k, 24, 12)), mat);
+    mesh.scale.z = 0.45;
+    mesh.position.copy(toLocal(led.x, led.y, front + (big ? 0.004 : 0.072)));
     mesh.userData.index = led.i;
     ledMeshes[led.i] = mesh;
     ledMats[led.i] = mat;
@@ -222,7 +208,7 @@ export function buildWheel(w: Wheel, opts: { quality?: "high" | "low" } = {}): W
     for (const led of w.leds) {
       const f = frame[led.i], m = ledMats[led.i];
       if (!f || !m) continue;
-      const boost = led.group === "buttons" ? 1.25 : led.group === "encoders" ? 1.6 : 2.5;
+      const boost = led.group === "buttons" || led.group === "encoders" ? 1.3 : 2.5;
       const a = f.a;
       // a dim smoky lens when off, HDR colour when lit (the bloom pass makes the glow)
       m.color.setRGB(0.012 + f.c[0] * a * boost, 0.01 + f.c[1] * a * boost, 0.012 + f.c[2] * a * boost);
