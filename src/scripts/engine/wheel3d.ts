@@ -90,7 +90,7 @@ function clipX(poly: [number, number][], limit: number, right: boolean) {
 
 export function buildWheel(w: Wheel, opts: { quality?: "high" | "low" } = {}): WheelModel {
   const k = w.widthMm / 100 / w.size[0];              // definition units -> world (1 = 10 cm)
-  const BEVEL = 0.075;                                   // a generous rounded edge
+  const BEVEL = 0.045;                                   // rounded edge, small enough to keep the traced notches
   const depth = Math.max(0.05, w.depthMm / 100 - BEVEL * 2); // the flat core between the two bevels
   const front = depth / 2 + BEVEL;                       // the face, bevel included: parts sit on it
   const cx = w.size[0] / 2, cy = w.size[1] / 2;
@@ -110,7 +110,7 @@ export function buildWheel(w: Wheel, opts: { quality?: "high" | "low" } = {}): W
   shape.moveTo(pts[0].x, pts[0].y);
   shape.splineThru([...pts.slice(1), pts[0]]);
   const bodyGeo = keep(new THREE.ExtrudeGeometry(shape, {
-    depth, bevelEnabled: true, bevelThickness: BEVEL, bevelSize: 0.07, bevelSegments: seg, curveSegments: 48, steps: 1,
+    depth, bevelEnabled: true, bevelThickness: BEVEL, bevelSize: 0.022, bevelSegments: seg, curveSegments: 48, steps: 1,
   }));
   bodyGeo.translate(0, 0, -depth / 2);
   const carbon = carbonTextures();
@@ -123,25 +123,15 @@ export function buildWheel(w: Wheel, opts: { quality?: "high" | "low" } = {}): W
   body.castShadow = body.receiveShadow = true;
   group.add(body);
 
-  // ----- grips: the outer thirds, alcantara, a little proud of the body -----
-  const gripMat = keep(new THREE.MeshStandardMaterial({ color: 0x2a2c31, roughness: 0.98, metalness: 0, map: keep(noiseTexture(70, 40)), bumpMap: keep(noiseTexture(128, 140)), bumpScale: 0.8 }));
-  for (const right of [false, true]) {
-    const limit = right ? w.size[0] * 0.88 : w.size[0] * 0.12; // clear of the outer buttons
-    const part = clipX(w.outline, limit, right);
-    if (part.length < 3) continue;
-    const gs = new THREE.Shape();
-    const gp = part.map(([x, y]) => P(x, y));
-    gs.moveTo(gp[0].x, gp[0].y); for (const p of gp.slice(1)) gs.lineTo(p.x, p.y); gs.closePath();
-    const gd = depth + BEVEL * 2 + 0.03; // wraps the edge, a little proud of the face at the front and the back
-    const gg = keep(new THREE.ExtrudeGeometry(gs, { depth: gd, bevelEnabled: true, bevelThickness: 0.04, bevelSize: 0.03, bevelSegments: seg, curveSegments: 24 }));
-    gg.translate(0, 0, -gd / 2);
-    group.add(new THREE.Mesh(gg, gripMat));
-  }
-
   // ----- neon rim: a thin red glowing line just inside the front edge -----
-  const rimCurve = new THREE.CatmullRomCurve3(w.outline.map(([x, y]) => {
-    const dx = x - cx, dy = y - cy, l = Math.hypot(dx, dy) || 1;
-    return toLocal(x - (dx / l) * 9, y - (dy / l) * 9, front + 0.004);
+  // inset along each point's normal (the traced outline has concave parts, so not towards the centre)
+  const ol = w.outline, n = ol.length;
+  const area = ol.reduce((s, [x, y], i) => { const [x2, y2] = ol[(i + 1) % n]; return s + x * y2 - x2 * y; }, 0);
+  const inward = area > 0 ? 1 : -1; // y points down: positive area = clockwise on screen
+  const rimCurve = new THREE.CatmullRomCurve3(ol.map(([x, y], i) => {
+    const [ax, ay] = ol[(i - 2 + n) % n], [bx, by] = ol[(i + 2) % n];
+    const tx = bx - ax, ty = by - ay, l = Math.hypot(tx, ty) || 1;
+    return toLocal(x - inward * (ty / l) * 4, y + inward * (tx / l) * 4, front + 0.004);
   }), true, "centripetal");
   const rimMat = keep(new THREE.MeshBasicMaterial({ color: new THREE.Color(2.2, 0.12, 0.18), toneMapped: false }));
   const rim = new THREE.Mesh(keep(new THREE.TubeGeometry(rimCurve, 400, 0.006, 8, true)), rimMat);
@@ -208,22 +198,7 @@ export function buildWheel(w: Wheel, opts: { quality?: "high" | "low" } = {}): W
 
   // ----- paddles and quick release, behind -----
   const alu = keep(new THREE.MeshStandardMaterial({ color: 0x6f757e, metalness: 1, roughness: 0.5, envMapIntensity: 0.55 }));
-  const halfW = (w.size[0] / 2) * k, halfH = (w.size[1] / 2) * k;
-  for (const side of [-1, 1]) {
-    // a broad blade behind each upper grip, its tip past the wheel's edge where the fingers reach it
-    const ps = new THREE.Shape();
-    ps.moveTo(0.18 * halfW, 0.42 * halfH);
-    ps.bezierCurveTo(0.55 * halfW, 0.5 * halfH, 0.95 * halfW, 0.42 * halfH, 1.12 * halfW, 0.12 * halfH);
-    ps.lineTo(1.16 * halfW, -0.28 * halfH);
-    ps.bezierCurveTo(1.1 * halfW, -0.42 * halfH, 1.0 * halfW, -0.44 * halfH, 0.92 * halfW, -0.3 * halfH);
-    ps.bezierCurveTo(0.7 * halfW, 0.0, 0.4 * halfW, 0.1 * halfH, 0.18 * halfW, 0.12 * halfH);
-    ps.closePath();
-    const pg = keep(new THREE.ExtrudeGeometry(ps, { depth: 0.03, bevelEnabled: true, bevelThickness: 0.008, bevelSize: 0.008, bevelSegments: 3, curveSegments: 24 }));
-    const paddle = new THREE.Mesh(pg, alu);
-    paddle.scale.set(side, 1, 1);
-    paddle.position.set(0, 0, -front - 0.06);
-    group.add(paddle);
-  }
+  // paddles left out: no measured shape for them yet (the quick release sits behind the body, out of sight from the front)
   const qr = new THREE.Mesh(keep(new THREE.CylinderGeometry(0.34, 0.38, 0.35, 64)), alu);
   qr.rotation.x = Math.PI / 2; qr.position.set(0, 0.05, -front - 0.18);
   group.add(qr);
