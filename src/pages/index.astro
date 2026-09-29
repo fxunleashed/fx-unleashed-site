@@ -3,19 +3,21 @@ import Base from "../layouts/Base.astro";
 import { wheels, defaultWheel } from "../data/wheels/index";
 import { PRESETS } from "../scripts/engine/lights";
 import { site } from "../config";
+import Icon from "../components/Icon.astro";
 const w = defaultWheel;
 const features = [
-  { icon: "◎", title: "Community library", text: "Dashes and screensavers made by other drivers. Preview them live, install in a click, no restart.", href: "/library/" },
-  { icon: "✎", title: "Dash designer", text: "Draw your own dash in the browser, see it on the wheel as you edit, check it can't flicker or lag.", href: "/docs/dash-designer/" },
-  { icon: "◉", title: "Screen mirror", text: "An OBS browser source with your wheel's screen and lights, live. Nobody else can show this wheel on stream.", href: "/docs/setup/#7-dashes" },
-  { icon: "⚙", title: "SimHub LED device", text: "Your wheel shows up in SimHub's Devices: any SimHub LED profile, or ATSR-Hub, drives all 38 lights.", href: "/docs/setup/#8-lights" },
-  { icon: "⛭", title: "Per car, per game", text: "Dashes, light presets, even your base's rotation and force follow the car you drive.", href: "/docs/setup/" },
-  { icon: "⚑", title: "Alerts that matter", text: "Flags, spotter, pit limiter, ABS and TC, low fuel, custom alerts from any SimHub value, in your order.", href: "/lab/" },
-  { icon: "☾", title: "Night mode", text: "A ceiling for every light and a dimmer screen, on a schedule or with ATSR-Hub's night mode.", href: "/docs/setup/#8-lights" },
-  { icon: "⟳", title: "Updates itself", text: "One click installs a new version, one click rolls it back. Your settings come with you.", href: "/changelog/" },
+  { icon: "library", title: "Community library", text: "Dashes and screensavers made by other drivers. Preview them live, install in a click, no restart.", href: "/library/" },
+  { icon: "designer", title: "Dash designer", text: "Draw your own dash in the browser, see it on the wheel as you edit, check it can't flicker or lag.", href: "/docs/dash-designer/" },
+  { icon: "mirror", title: "Screen mirror", text: "An OBS browser source with your wheel's screen and lights, live. Nobody else can show this wheel on stream.", href: "/docs/setup/#7-dashes" },
+  { icon: "device", title: "SimHub LED device", text: "Your wheel shows up in SimHub's Devices: any SimHub LED profile, or ATSR-Hub, drives all 38 lights.", href: "/docs/setup/#8-lights" },
+  { icon: "car", title: "Per car, per game", text: "Dashes, light presets, even your base's rotation and force follow the car you drive.", href: "/docs/setup/" },
+  { icon: "flag", title: "Alerts that matter", text: "Flags, spotter, pit limiter, ABS and TC, low fuel, custom alerts from any SimHub value, in your order.", href: "/lab/" },
+  { icon: "moon", title: "Night mode", text: "A ceiling for every light and a dimmer screen, on a schedule or with ATSR-Hub's night mode.", href: "/docs/setup/#8-lights" },
+  { icon: "update", title: "Updates itself", text: "One click installs a new version, one click rolls it back. Your settings come with you.", href: "/changelog/" },
 ];
 ---
 <Base>
+  <div class="boot" id="boot" aria-hidden="true"><div class="boot-in"><img src="/brand/mark-512.png" alt="" width="200" height="200" /><div class="dots">{Array.from({ length: 13 }).map((_, i) => <i style={`--i:${i}`}></i>)}</div></div></div>
   <div id="stage" class="stage" aria-hidden="true">
     <img class="stage-fallback" src="/brand/mark-512.png" alt="" />
   </div>
@@ -32,8 +34,8 @@ const features = [
         <a class="btn" href="/library/">Browse the library</a>
       </div>
       <dl class="stats">
-        <div><dt>{w.leds.length}</dt><dd>lights, any colour</dd></div>
-        <div><dt>60</dt><dd>light frames a second</dd></div>
+        <div><dt data-count={w.leds.length}>{w.leds.length}</dt><dd>lights, any colour</dd></div>
+        <div><dt data-count="60">60</dt><dd>light frames a second</dd></div>
         <div><dt>1-click</dt><dd>dash installs</dd></div>
         <div><dt>€0</dt><dd>free, open source</dd></div>
       </dl>
@@ -43,7 +45,7 @@ const features = [
 
   <!-- 2. lights -->
   <section class="chapter" id="lights" data-shot="rev">
-    <div class="wrap"><div class="panel glass left">
+    <div class="wrap"><div class="panel glass left reveal">
       <p class="eyebrow">01 · Lights</p>
       <h2>Every light.<br />Any colour.</h2>
       <p>Rev bar, side lights, button caps, encoder rings: {w.leds.length} LEDs, each its own colour, 60 times a second. Shift lights follow each car's real data.</p>
@@ -60,7 +62,7 @@ const features = [
 
   <!-- 3. dashes -->
   <section class="chapter" id="dashes" data-shot="screen">
-    <div class="wrap"><div class="panel glass right">
+    <div class="wrap"><div class="panel glass right reveal">
       <p class="eyebrow">02 · Dashes</p>
       <h2>Dashes that are yours.</h2>
       <p>Pick one per car, switch with the dash button, or design your own. What you see on the wheel here is the real dash file, rendered live from a simulated lap.</p>
@@ -72,7 +74,7 @@ const features = [
 
   <!-- 4. alerts -->
   <section class="chapter" id="alerts" data-shot="controls">
-    <div class="wrap"><div class="panel glass left">
+    <div class="wrap"><div class="panel glass left reveal">
       <p class="eyebrow">03 · Alerts</p>
       <h2>See it before you think it.</h2>
       <p>Flags on the side lights, the spotter at the edge of your eye, ABS and TC rings that flash while they work. Your order, your colours, plus custom alerts from any SimHub value.</p>
@@ -94,7 +96,7 @@ const features = [
 
   <!-- 5. drive -->
   <section class="chapter" id="drive" data-shot="drive">
-    <div class="wrap"><div class="panel glass right">
+    <div class="wrap"><div class="panel glass right reveal">
       <p class="eyebrow">04 · Drive it</p>
       <h2>Take it for a lap.</h2>
       <p>You're driving now: the dash, the shift lights and the alerts all react. It's the same engine the plugin uses for its demo.</p>
@@ -115,7 +117,7 @@ const features = [
 
   <!-- 6. safety -->
   <section class="chapter" id="safety" data-shot="back">
-    <div class="wrap"><div class="panel glass left">
+    <div class="wrap"><div class="panel glass left reveal">
       <p class="eyebrow">05 · Built carefully</p>
       <h2>Your base is never touched.</h2>
       <p>Force feedback and base settings stay with SimPro. Unleashed mode changes only the wheel's own app, and every change is checked against the stock firmware in an emulator before it's tried on a real wheel. Going back to stock is SimPro's own reinstall.</p>
@@ -132,7 +134,7 @@ const features = [
         <div class="grid four features">
           {features.map((f, i) => (
             <a class="card glow reveal" href={f.href} style={`transition-delay:${i * 50}ms`}>
-              <span class="ico" aria-hidden="true">{f.icon}</span>
+              <span class="ico"><Icon name={f.icon} /></span>
               <h3>{f.title}</h3>
               <p>{f.text}</p>
             </a>
@@ -218,6 +220,16 @@ const features = [
 </Base>
 
 <style>
+  .boot { position: fixed; inset: 0; z-index: 3; display: grid; place-items: center; background: var(--bg); transition: opacity 0.9s var(--ease), visibility 0.9s; pointer-events: none; }
+  .boot.gone { opacity: 0; visibility: hidden; }
+  .boot-in { position: relative; display: grid; place-items: center; gap: 18px; }
+  .boot img { filter: drop-shadow(0 0 40px rgba(255,31,45,0.5)); animation: pulse 2s ease-in-out infinite; }
+  .dots { display: flex; gap: 6px; }
+  .dots i { width: 8px; height: 8px; border-radius: 50%; background: #3a0a0e; animation: sweep 1.6s calc(var(--i) * 0.06s) infinite; }
+  @keyframes sweep { 0%, 100% { background: #3a0a0e; box-shadow: none; } 30% { background: #fff; box-shadow: 0 0 10px #fff; } 55% { background: #ff1f2d; box-shadow: 0 0 12px #ff1f2d; } }
+  @keyframes pulse { 50% { transform: scale(1.03); } }
+  .panel.reveal { transform: translateY(40px) scale(0.98); }
+  .panel.reveal.in { transform: none; }
   .stage { position: fixed; inset: 0; z-index: 0; transition: opacity 0.4s; }
   .stage :global(canvas) { width: 100% !important; height: 100% !important; }
   .stage-fallback { position: absolute; top: 50%; left: 50%; width: 320px; transform: translate(-50%, -50%); opacity: 0.25; }
@@ -285,6 +297,10 @@ const features = [
   @keyframes float { 50% { transform: translateY(-10px) rotate(-2deg); } }
 
   @media (max-width: 800px) {
+    .hero { padding-bottom: 8vh; }
+    .hero .stats { display: none; }
+    .title { font-size: clamp(44px, 13vw, 64px); }
+    .hero .lead { font-size: 16px; }
     .chapter { align-items: flex-end; min-height: 110vh; }
     .panel { max-width: none; padding: 24px; }
     .hud { bottom: 16px; gap: 20px; }

@@ -146,7 +146,7 @@ export class Stage {
     this.composer.addPass(this.film);
 
     this.shot = SHOTS[opts.shot ?? "hero"];
-    if (host.clientWidth / Math.max(1, host.clientHeight) < 0.9 && SHOTS[(opts.shot ?? "hero") + "Narrow"]) this.shot = SHOTS[(opts.shot ?? "hero") + "Narrow"];
+    this.shot = this.resolve(opts.shot ?? "hero") ?? this.shot;
     this.cur.cam.fromArray(this.shot.cam).add(new THREE.Vector3(0, 0, opts.intro ? 2.5 : 0));
     this.cur.look.fromArray(this.shot.look);
     this.cur.rot.set(...(this.shot.rot));
@@ -226,7 +226,17 @@ export class Stage {
   }
 
   private narrow() { return this.host.clientWidth / Math.max(1, this.host.clientHeight) < 0.9; }
-  private resolve(name: string) { return (this.narrow() && SHOTS[name + "Narrow"]) ? SHOTS[name + "Narrow"] : SHOTS[name]; }
+  /**
+   * Portrait screens: a shot's "Narrow" twin if it has one, else one derived from it: centred (the side panels stack
+   * under the wheel there), pulled back, and the wheel raised into the top half of the screen.
+   */
+  private resolve(name: string): Shot | undefined {
+    const s = SHOTS[name];
+    if (!s || !this.narrow()) return s;
+    if (SHOTS[name + "Narrow"]) return SHOTS[name + "Narrow"];
+    const dx = s.cam[0] - s.look[0];
+    return { cam: [dx, s.cam[1] - 0.95, s.cam[2] * 1.45 + 0.6], look: [0, s.look[1] - 0.95, s.look[2]], rot: s.rot };
+  }
   setShot(name: string) { const s = this.resolve(name); if (s) this.shot = s; }
   /** Blends between two shots (scroll-driven pages). */
   blendShots(a: string, b: string, t: number) {

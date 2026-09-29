@@ -1,5 +1,6 @@
 // The home page: the live wheel behind six scroll chapters, and everything you can do to it.
-import { Stage, webglOk } from "./engine/stage";
+import { webglOk } from "./engine/webgl";
+import type { Stage as StageT } from "./engine/stage";
 import { defaultWheel } from "../data/wheels/index";
 import { PRESETS, hex, type RGB } from "./engine/lights";
 import { EngineSound } from "./engine/audio";
@@ -8,8 +9,22 @@ import { loadIndex, url, type LibraryItem } from "./library";
 const host = document.getElementById("stage")!;
 const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-if (webglOk()) {
-  const stage = new Stage(host, defaultWheel, { shot: "hero", intro: !reduced });
+const boot = document.getElementById("boot");
+const unboot = () => boot?.classList.add("gone");
+setTimeout(unboot, 2500); // never hold the page for the 3D
+
+// the stats count up when they first show
+for (const dt of document.querySelectorAll<HTMLElement>("[data-count]")) {
+  const to = +dt.dataset.count!, t0 = performance.now();
+  const step = (now: number) => { const k = Math.min(1, (now - t0) / 1400); dt.textContent = String(Math.round(to * (1 - Math.pow(1 - k, 3)))); if (k < 1) requestAnimationFrame(step); };
+  requestAnimationFrame(step);
+}
+
+if (!webglOk()) unboot();
+else (async () => {
+  const { Stage } = await import("./engine/stage"); // three.js in its own chunk: the text shows first
+  const stage: StageT = new Stage(host, defaultWheel, { shot: "hero", intro: !reduced });
+  unboot();
   host.classList.add("live");
   (window as any).stage = stage;
   const car = stage.car;
@@ -76,7 +91,17 @@ if (webglOk()) {
     b.setAttribute("aria-pressed", String(forced[k]));
   }));
   document.getElementById("bias-btn")!.addEventListener("click", () => car.setBias(car.s.brakeBias + (Math.random() < 0.5 ? -0.5 : 0.5)));
-  stage.onStep = () => { for (const [k, v] of Object.entries(forced)) if (v) (car.s as any)[k] = true; };
+  // in the hero, sweeping the pointer across the page revs the wheel (the rev bar follows it)
+  let pointerX = -1, pointerAt = 0;
+  addEventListener("pointermove", e => { pointerX = e.clientX / innerWidth; pointerAt = performance.now(); }, { passive: true });
+  stage.onStep = () => {
+    for (const [k, v] of Object.entries(forced)) if (v) (car.s as any)[k] = true;
+    if (current === "hero" && !revving && performance.now() - pointerAt < 1800 && pointerX >= 0) {
+      const pct = 45 + pointerX * 57; // left = idle, right = past the shift point
+      car.s.rpmPercent = Math.min(100, pct); car.s.rpm = (car.s.rpmPercent / 100) * car.s.maxRpm;
+      car.s.shift = car.s.rpmPercent >= stage.lights.shiftPct; car.s.limiter = car.s.rpmPercent >= 99.5;
+    }
+  };
 
   // ---------- drive ----------
   const hud = document.getElementById("hud")!;
@@ -165,4 +190,4 @@ if (webglOk()) {
       row.appendChild(a);
     }
   }).catch(() => { document.getElementById("dash-chips")!.textContent = "The library isn't reachable right now."; });
-}
+})();
