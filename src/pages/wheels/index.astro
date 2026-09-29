@@ -1,0 +1,26 @@
+---
+import Base from "../../layouts/Base.astro";
+import { wheels } from "../../data/wheels/index";
+---
+<Base title="Wheels" description="The wheels FX Unleashed supports.">
+  <section class="wrap page">
+    <p class="eyebrow">Wheels</p>
+    <h1>Wheels</h1>
+    <p class="lead">Everything on this site, the 3D model, the light lab and the LED maps, is built from one description per wheel. Adding a wheel starts there.</p>
+    <div class="grid three list">
+      {wheels.map(w => (
+        <a class="card glow" href={`/wheels/${w.id}/`}>
+          <span class={`badge ${w.status}`}>{w.status}</span>
+          <h3>{w.maker} {w.name}</h3>
+          <p>{w.tagline}</p>
+          <p class="muted">{w.leds.length} lights · {w.screen.px[0]}×{w.screen.px[1]} screen</p>
+        </a>
+      ))}
+    </div>
+  </section>
+</Base>
+<style>
+  .page { padding: 150px 0 100px; position: relative; z-index: 1; }
+  .list { margin-top: 40px; }
+  .badge { display: inline-block; font: 700 10px/1 var(--display); letter-spacing: 0.2em; text-transform: uppercase; padding: 6px 9px; border-radius: 6px; margin-bottom: 14px; background: rgba(33,224,122,0.12); color: var(--green); }
+</style>

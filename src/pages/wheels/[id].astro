@@ -1,0 +1,62 @@
+---
+import Base from "../../layouts/Base.astro";
+import LedMap from "../../components/LedMap.astro";
+import { wheels, type Wheel } from "../../data/wheels/index";
+
+export function getStaticPaths() {
+  return wheels.map(w => ({ params: { id: w.id }, props: { w } }));
+}
+const { w } = Astro.props as { w: Wheel };
+const specs: [string, string][] = [
+  ["Lights", `${w.leds.length} (${Object.values(w.groups).map(g => `${g.leds.length} ${g.label.toLowerCase()}`).join(", ")})`],
+  ["Screen", `${w.screen.px[0]} × ${w.screen.px[1]}`],
+  ["Support", w.status === "supported" ? "Standard and Unleashed mode" : w.status],
+];
+---
+<Base title={`${w.maker} ${w.name}`} description={`${w.maker} ${w.name} with FX Unleashed: ${w.tagline}`}>
+  <section class="wrap page">
+    <div class="top">
+      <div class="text">
+        <p class="eyebrow">Wheels · {w.status}</p>
+        <h1>{w.maker} <span class="red">{w.name}</span></h1>
+        <p class="lead">{w.tagline}</p>
+        <dl class="specs">{specs.map(([k, v]) => <div><dt>{k}</dt><dd>{v}</dd></div>)}</dl>
+        <div class="ctas"><a class="btn primary" href="/start/">Set it up</a><a class="btn" href="/lab/">Play with its lights</a></div>
+      </div>
+      <div class="view" id="view" data-wheel={w.id}></div>
+    </div>
+
+    <h2 class="reveal">What you get</h2>
+    <div class="grid two">{w.features.map(f => <div class="card glow reveal"><h3>{f.title}</h3><p>{f.text}</p></div>)}</div>
+
+    <h2 class="reveal" id="leds">Which LED is which</h2>
+    <p class="lead reveal">Numbers as the wheel's firmware counts them: use them for SimHub's LED device, ATSR-Hub or the plugin's own LED settings. Hover to see each one.</p>
+    <div class="card reveal"><LedMap wheel={w} /></div>
+  </section>
+</Base>
+<style>
+  .page { padding: 130px 0 100px; position: relative; z-index: 1; }
+  .top { display: grid; grid-template-columns: 1fr 1.2fr; gap: 30px; align-items: center; min-height: 70vh; }
+  .view { position: relative; height: min(62vh, 560px); border-radius: 24px; overflow: hidden; background: radial-gradient(circle at 50% 45%, #1a0508, #050608 70%); border: 1px solid var(--line); }
+  .view :global(canvas) { position: absolute; inset: 0; width: 100% !important; height: 100% !important; }
+  .specs { display: grid; gap: 10px; margin: 30px 0; }
+  .specs div { display: flex; gap: 16px; padding-bottom: 10px; border-bottom: 1px solid var(--line); }
+  .specs dt { width: 90px; flex: none; font: 600 11px/1.8 var(--display); letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-3); }
+  .specs dd { margin: 0; }
+  .ctas { display: flex; gap: 10px; flex-wrap: wrap; }
+  h2 { margin-top: 90px; }
+  @media (max-width: 900px) { .top { grid-template-columns: 1fr; } }
+</style>
+<script>
+  import { Stage, webglOk } from "../../scripts/engine/stage";
+  import { wheelById } from "../../data/wheels/index";
+  import { loadIndex, url } from "../../scripts/library";
+  const host = document.getElementById("view")!;
+  const w = wheelById(host.dataset.wheel!);
+  if (w && webglOk()) {
+    const stage = new Stage(host, w, { shot: "card", intro: true, particles: false });
+    stage.autoSpin = 0.25;
+    (window as any).stage = stage;
+    loadIndex().then(i => { const d = i.Items.find(x => x.Kind === "dash"); if (d) fetch(url(d.DashUrl)).then(r => r.json()).then(j => stage.setDash(j)); });
+  }
+</script>

@@ -1,0 +1,40 @@
+---
+// The wheel's LEDs, numbered as the firmware counts them, drawn from the wheel definition (a flat SVG: prints, works
+// without WebGL, and is what people need when mapping LEDs in SimHub or ATSR-Hub).
+import type { Wheel } from "../data/wheels/index";
+interface Props { wheel: Wheel }
+const { wheel: w } = Astro.props;
+const colours: Record<string, string> = { rev: "#21e07a", sideLeft: "#ffb000", sideRight: "#ffb000", buttons: "#4da3ff", encoders: "#b07cff" };
+const path = "M" + w.outline.map(([x, y]) => `${x},${y}`).join(" L") + " Z";
+---
+<figure class="ledmap">
+  <svg viewBox={`-10 -10 ${w.size[0] + 20} ${w.size[1] + 20}`} role="img" aria-label={`${w.name} LED numbers`}>
+    <path d={path} fill="#0e1014" stroke="#ff1f2d" stroke-width="3" stroke-linejoin="round" />
+    <rect x={w.bezel.x} y={w.bezel.y} width={w.bezel.w} height={w.bezel.h} rx={w.bezel.r} fill="#050607" stroke="#2a2e35" />
+    <rect x={w.screen.x} y={w.screen.y} width={w.screen.w} height={w.screen.h} fill="#000" stroke="#1c1f25" />
+    <text x={w.screen.x + w.screen.w / 2} y={w.screen.y + w.screen.h / 2 + 5} text-anchor="middle" class="scr">{w.screen.px[0]} × {w.screen.px[1]}</text>
+    {w.leds.map(l => (
+      <g class="led" data-group={l.group}>
+        <title>{`LED ${l.i}: ${l.name}`}</title>
+        <circle cx={l.x} cy={l.y} r={Math.max(l.r, 7)} fill="none" stroke={colours[l.group] ?? "#fff"} stroke-width={l.group === "rev" || l.group.startsWith("side") ? 0 : 2.5} />
+        {(l.group === "rev" || l.group.startsWith("side")) && <circle cx={l.x} cy={l.y} r={l.r + 1} fill={colours[l.group]} />}
+        <text x={l.x} y={l.group === "rev" ? l.y - 12 : l.y + 4} text-anchor="middle" class={l.group === "rev" || l.group.startsWith("side") ? "n small" : "n"}>{l.i}</text>
+      </g>
+    ))}
+  </svg>
+  <figcaption>
+    {Object.entries(w.groups).map(([id, g]) => <span><i style={`background:${colours[id]}`}></i>{g.label}: {g.leds[0]}–{g.leds[g.leds.length - 1]}</span>)}
+  </figcaption>
+</figure>
+<style>
+  .ledmap { margin: 0; }
+  svg { width: 100%; height: auto; }
+  .n { fill: #fff; font: 700 13px var(--mono); }
+  .n.small { font-size: 9px; fill: var(--text-2); }
+  .scr { fill: var(--text-3); font: 600 12px var(--display); letter-spacing: 0.1em; }
+  .led { transition: opacity 0.2s; }
+  svg:hover .led { opacity: 0.35; }
+  svg .led:hover { opacity: 1; }
+  figcaption { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 14px; font-size: 13px; color: var(--text-2); }
+  figcaption i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; }
+</style>

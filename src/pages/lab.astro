@@ -1,0 +1,116 @@
+---
+import Base from "../layouts/Base.astro";
+import { PRESETS } from "../scripts/engine/lights";
+import { defaultWheel } from "../data/wheels/index";
+const groups = Object.entries(defaultWheel.groups);
+---
+<Base title="Light lab" description="Play with every light of the FX Pro in 3D: presets, paint any LED, rev it, throw flags. See which LED is which.">
+  <div class="lab">
+    <div id="stage" class="stage" aria-label="3D wheel"></div>
+    <div class="tip" id="tip" hidden></div>
+
+    <aside class="tools glass" id="tools">
+      <header><p class="eyebrow">Light lab</p><button class="collapse" id="collapse" aria-label="Hide the tools">⟨</button></header>
+
+      <details open>
+        <summary>Presets</summary>
+        <div class="presets">
+          {PRESETS.map((p, i) => (
+            <button class="preset" data-preset={p.id} aria-pressed={i === 0 ? "true" : "false"}>
+              <span class="bar" style={`background:linear-gradient(90deg,${p.rev.join(",")})`}></span>
+              <b>{p.name}</b><small>{p.blurb}</small>
+            </button>
+          ))}
+        </div>
+      </details>
+
+      <details open>
+        <summary>Paint</summary>
+        <p class="hint">Click a light to paint it. Shift-click clears it.</p>
+        <div class="row">
+          <input type="color" id="color" value="#ff1f2d" aria-label="Colour" />
+          <div class="swatches" id="swatches">
+            {["#ff1f2d", "#ff6a00", "#ffd400", "#21e07a", "#00e5ff", "#2f6bff", "#7a5cff", "#ff2bd6", "#ffffff"].map(c => <button class="sw" data-c={c} style={`background:${c}`} aria-label={c}></button>)}
+          </div>
+        </div>
+        <div class="chips">
+          {groups.map(([id, g]) => <button class="chip" data-fill={id}>Fill {g.label.toLowerCase()}</button>)}
+          <button class="chip" data-fill="all">Fill all</button>
+          <button class="chip" id="rainbow">Rainbow</button>
+          <button class="chip" id="clear">Clear paint</button>
+        </div>
+        <label class="slider">Brightness <input type="range" id="bright" min="10" max="100" value="100" /></label>
+      </details>
+
+      <details open>
+        <summary>Rev lights</summary>
+        <label class="slider">RPM <span id="rpm-out">auto</span><input type="range" id="rpm" min="0" max="100" value="0" /></label>
+        <label class="slider">Lights start at <span id="start-out">58%</span><input type="range" id="start" min="30" max="90" value="58" /></label>
+        <label class="slider">Shift point <span id="shift-out">94%</span><input type="range" id="shift" min="70" max="99" value="94" /></label>
+      </details>
+
+      <details>
+        <summary>Alerts</summary>
+        <div class="chips">
+          {["yellow", "blue", "green", "chequered", "black"].map(f => <button class="chip" data-flag={f}>{f} flag</button>)}
+          {[["spotterLeft", "Car left"], ["spotterRight", "Car right"], ["absActive", "ABS working"], ["tcActive", "TC working"], ["pitLimiter", "Pit limiter"]].map(([k, l]) => <button class="chip" data-toggle={k} aria-pressed="false">{l}</button>)}
+        </div>
+      </details>
+
+      <details>
+        <summary>Screen</summary>
+        <div class="chips" id="screens"><button class="chip" data-screen="saver">Logo</button><button class="chip" data-screen="off">Off</button></div>
+      </details>
+
+      <details>
+        <summary>View</summary>
+        <div class="chips">
+          {[["lab", "Front"], ["rev", "Rev bar"], ["screen", "Screen"], ["controls", "Controls"], ["side", "Side"], ["back", "Back"]].map(([s, l]) => <button class="chip" data-shot={s}>{l}</button>)}
+          <button class="chip" id="spin" aria-pressed="false">Turntable</button>
+        </div>
+        <div class="chips"><button class="btn small" id="shot">Save a picture</button><button class="btn small" id="export">Copy colours (JSON)</button></div>
+        <p class="hint" id="export-note"></p>
+      </details>
+    </aside>
+    <button class="reopen btn small" id="reopen" hidden>Tools</button>
+  </div>
+</Base>
+
+<style>
+  .lab { position: fixed; inset: 0; z-index: 1; }
+  .stage { position: absolute; inset: 0; }
+  .stage :global(canvas) { width: 100% !important; height: 100% !important; }
+  .tools { position: absolute; top: 84px; left: 20px; bottom: 20px; width: 340px; padding: 18px; overflow-y: auto; z-index: 3; }
+  .tools header { display: flex; justify-content: space-between; align-items: center; }
+  .collapse { width: 32px; height: 32px; border-radius: 10px; border: 1px solid var(--line-2); background: none; color: #fff; cursor: pointer; }
+  details { border-top: 1px solid var(--line); padding: 12px 0; }
+  summary { cursor: pointer; font: 600 13px/1 var(--display); letter-spacing: 0.16em; text-transform: uppercase; list-style: none; }
+  summary::after { content: "+"; float: right; color: var(--red); }
+  details[open] summary::after { content: "−"; }
+  details > :not(summary) { margin-top: 12px; }
+  .presets { display: grid; gap: 8px; }
+  .preset { display: grid; grid-template-columns: 1fr; text-align: left; gap: 4px; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--line); background: rgba(255,255,255,0.02); color: var(--text); cursor: pointer; }
+  .preset[aria-pressed="true"] { border-color: var(--red); background: rgba(255,31,45,0.08); }
+  .preset .bar { height: 6px; border-radius: 3px; box-shadow: 0 0 12px rgba(255,255,255,0.15); }
+  .preset b { font: 600 14px/1.2 var(--display); }
+  .preset small { color: var(--text-3); font-size: 12px; }
+  .row { display: flex; gap: 10px; align-items: center; }
+  input[type="color"] { width: 44px; height: 44px; border: 0; padding: 0; background: none; border-radius: 12px; cursor: pointer; }
+  .swatches { display: flex; flex-wrap: wrap; gap: 6px; }
+  .sw { width: 22px; height: 22px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.15); cursor: pointer; box-shadow: 0 0 10px currentColor; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chips .chip { text-transform: capitalize; }
+  .slider { display: grid; gap: 6px; font-size: 13px; color: var(--text-2); margin-top: 10px; }
+  .slider span { float: right; color: #fff; font-family: var(--mono); font-size: 12px; }
+  input[type="range"] { width: 100%; accent-color: var(--red); }
+  .hint { font-size: 12.5px; color: var(--text-3); margin: 0; }
+  .tip { position: fixed; z-index: 5; pointer-events: none; padding: 8px 12px; border-radius: 10px; background: rgba(10,11,14,0.92); border: 1px solid var(--line-2); font-size: 13px; transform: translate(14px, 14px); white-space: nowrap; }
+  .tip b { color: var(--red-2); font-family: var(--mono); margin-right: 6px; }
+  .reopen { position: absolute; top: 90px; left: 20px; z-index: 3; }
+  @media (max-width: 800px) { .tools { top: auto; left: 10px; right: 10px; bottom: 10px; width: auto; max-height: 48vh; } }
+</style>
+<style is:global>
+  body:has(.lab) footer { display: none; }
+</style>
+
+<script src="../scripts/lab.ts"></script>

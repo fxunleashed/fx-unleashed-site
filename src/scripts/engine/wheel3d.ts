@@ -116,7 +116,7 @@ export function buildWheel(w: Wheel, opts: { quality?: "high" | "low" } = {}): W
   const carbon = carbonTextures();
   for (const t of Object.values(carbon)) { t.repeat.set(1.3, 1.3); keep(t); }
   const bodyMat = keep(new THREE.MeshPhysicalMaterial({
-    ...carbon, color: 0xffffff, metalness: 0.25, roughness: 0.42, clearcoat: 1, clearcoatRoughness: 0.06,
+    ...carbon, color: 0xffffff, metalness: 0.25, roughness: 0.42, clearcoat: 1, clearcoatRoughness: 0.16,
     normalScale: new THREE.Vector2(0.35, 0.35), envMapIntensity: 1.1,
   }));
   const body = new THREE.Mesh(bodyGeo, bodyMat);
@@ -126,7 +126,7 @@ export function buildWheel(w: Wheel, opts: { quality?: "high" | "low" } = {}): W
   // ----- grips: the outer thirds, alcantara, a little proud of the body -----
   const gripMat = keep(new THREE.MeshStandardMaterial({ color: 0x2a2c31, roughness: 0.98, metalness: 0, map: keep(noiseTexture(70, 40)), bumpMap: keep(noiseTexture(128, 140)), bumpScale: 0.8 }));
   for (const right of [false, true]) {
-    const limit = right ? w.size[0] * 0.855 : w.size[0] * 0.145;
+    const limit = right ? w.size[0] * 0.88 : w.size[0] * 0.12; // clear of the outer buttons
     const part = clipX(w.outline, limit, right);
     if (part.length < 3) continue;
     const gs = new THREE.Shape();
@@ -157,7 +157,7 @@ export function buildWheel(w: Wheel, opts: { quality?: "high" | "low" } = {}): W
   const screenTexture = keep(new THREE.CanvasTexture(screenCanvas));
   screenTexture.colorSpace = THREE.SRGBColorSpace;
   screenTexture.anisotropy = 8;
-  const screenMat = keep(new THREE.MeshBasicMaterial({ map: screenTexture, toneMapped: false, color: new THREE.Color(1.05, 1.05, 1.05) }));
+  const screenMat = keep(new THREE.MeshBasicMaterial({ map: screenTexture, toneMapped: false, color: new THREE.Color(1.12, 1.12, 1.12) })); // a touch over 1: bright text glows a little
   const screen = new THREE.Mesh(keep(new THREE.PlaneGeometry(s.w * k, s.h * k)), screenMat);
   screen.position.copy(toLocal(s.x + s.w / 2, s.y + s.h / 2, front + 0.0712));
   group.add(screen);
@@ -172,7 +172,7 @@ export function buildWheel(w: Wheel, opts: { quality?: "high" | "low" } = {}): W
   const ledMats: THREE.MeshBasicMaterial[] = [];
   const capMat = keep(new THREE.MeshPhysicalMaterial({ color: 0x0c0d10, roughness: 0.35, metalness: 0.2, clearcoat: 0.8, clearcoatRoughness: 0.15 }));
   const knurl = keep(knurlNormal()); knurl.repeat.set(6, 1);
-  const knobMat = keep(new THREE.MeshStandardMaterial({ color: 0x8a8f98, metalness: 1, roughness: 0.32, normalMap: knurl, normalScale: new THREE.Vector2(0.9, 0.9) }));
+  const knobMat = keep(new THREE.MeshStandardMaterial({ color: 0x2c2f35, metalness: 0.9, roughness: 0.38, normalMap: knurl, normalScale: new THREE.Vector2(0.9, 0.9) }));
   const smoked = keep(new THREE.MeshPhysicalMaterial({ color: 0x120405, roughness: 0.1, transparent: true, opacity: 0.55, clearcoat: 1 }));
   const revLeds = w.groups.rev?.leds ?? [];
   if (revLeds.length) {
@@ -189,9 +189,9 @@ export function buildWheel(w: Wheel, opts: { quality?: "high" | "low" } = {}): W
       const enc = led.group === "encoders";
       // the cap or knob, and the LED as a glowing ring around it
       const r = led.r * k * (enc ? 1.05 : 1.15);
-      const body = new THREE.Mesh(keep(new THREE.CylinderGeometry(r * (enc ? 0.86 : 0.92), r, enc ? 0.16 : 0.07, 48)), enc ? knobMat : capMat);
+      const body = new THREE.Mesh(keep(new THREE.CylinderGeometry(r * (enc ? 0.88 : 0.92), r, enc ? 0.11 : 0.07, 48)), enc ? knobMat : capMat);
       body.rotation.x = Math.PI / 2;
-      body.position.copy(toLocal(led.x, led.y, front + (enc ? 0.08 : 0.035)));
+      body.position.copy(toLocal(led.x, led.y, front + (enc ? 0.055 : 0.035)));
       group.add(body);
       mesh = new THREE.Mesh(keep(new THREE.TorusGeometry(r * 1.06, r * 0.075, 12, 64)), mat);
       mesh.position.copy(toLocal(led.x, led.y, front + 0.012));
@@ -207,22 +207,28 @@ export function buildWheel(w: Wheel, opts: { quality?: "high" | "low" } = {}): W
   }
 
   // ----- paddles and quick release, behind -----
-  const alu = keep(new THREE.MeshStandardMaterial({ color: 0xb8bcc4, metalness: 1, roughness: 0.22 }));
+  const alu = keep(new THREE.MeshStandardMaterial({ color: 0x6f757e, metalness: 1, roughness: 0.5, envMapIntensity: 0.55 }));
+  const halfW = (w.size[0] / 2) * k, halfH = (w.size[1] / 2) * k;
   for (const side of [-1, 1]) {
+    // a broad blade behind each upper grip, its tip past the wheel's edge where the fingers reach it
     const ps = new THREE.Shape();
-    ps.moveTo(0, 0); ps.bezierCurveTo(0.55, 0.05, 0.78, -0.25, 0.8, -0.95); ps.lineTo(0.62, -1.02);
-    ps.bezierCurveTo(0.55, -0.45, 0.4, -0.22, 0.02, -0.2); ps.closePath();
-    const pg = keep(new THREE.ExtrudeGeometry(ps, { depth: 0.035, bevelEnabled: true, bevelThickness: 0.01, bevelSize: 0.01, bevelSegments: 3 }));
+    ps.moveTo(0.18 * halfW, 0.42 * halfH);
+    ps.bezierCurveTo(0.55 * halfW, 0.5 * halfH, 0.95 * halfW, 0.42 * halfH, 1.12 * halfW, 0.12 * halfH);
+    ps.lineTo(1.16 * halfW, -0.28 * halfH);
+    ps.bezierCurveTo(1.1 * halfW, -0.42 * halfH, 1.0 * halfW, -0.44 * halfH, 0.92 * halfW, -0.3 * halfH);
+    ps.bezierCurveTo(0.7 * halfW, 0.0, 0.4 * halfW, 0.1 * halfH, 0.18 * halfW, 0.12 * halfH);
+    ps.closePath();
+    const pg = keep(new THREE.ExtrudeGeometry(ps, { depth: 0.03, bevelEnabled: true, bevelThickness: 0.008, bevelSize: 0.008, bevelSegments: 3, curveSegments: 24 }));
     const paddle = new THREE.Mesh(pg, alu);
     paddle.scale.set(side, 1, 1);
-    paddle.position.set(side * 0.55, 0.12, -depth / 2 - 0.09);
+    paddle.position.set(0, 0, -front - 0.06);
     group.add(paddle);
   }
   const qr = new THREE.Mesh(keep(new THREE.CylinderGeometry(0.34, 0.38, 0.35, 64)), alu);
-  qr.rotation.x = Math.PI / 2; qr.position.set(0, 0.05, -depth / 2 - 0.2);
+  qr.rotation.x = Math.PI / 2; qr.position.set(0, 0.05, -front - 0.18);
   group.add(qr);
-  const qrRing = new THREE.Mesh(keep(new THREE.TorusGeometry(0.36, 0.02, 12, 64)), keep(new THREE.MeshBasicMaterial({ color: new THREE.Color(2, 0.1, 0.15), toneMapped: false })));
-  qrRing.position.set(0, 0.05, -depth / 2 - 0.38);
+  const qrRing = new THREE.Mesh(keep(new THREE.TorusGeometry(0.36, 0.02, 12, 64)), keep(new THREE.MeshBasicMaterial({ color: new THREE.Color(1.3, 0.08, 0.12), toneMapped: false })));
+  qrRing.position.set(0, 0.05, -front - 0.355);
   group.add(qrRing);
 
   // ----- build-in and LEDs -----
@@ -241,7 +247,7 @@ export function buildWheel(w: Wheel, opts: { quality?: "high" | "low" } = {}): W
     for (const led of w.leds) {
       const f = frame[led.i], m = ledMats[led.i];
       if (!f || !m) continue;
-      const boost = led.group === "buttons" ? 1.25 : led.group === "encoders" ? 1.6 : 3.2;
+      const boost = led.group === "buttons" ? 1.25 : led.group === "encoders" ? 1.6 : 2.5;
       const a = f.a;
       // a dim smoky lens when off, HDR colour when lit (the bloom pass makes the glow)
       m.color.setRGB(0.012 + f.c[0] * a * boost, 0.01 + f.c[1] * a * boost, 0.012 + f.c[2] * a * boost);

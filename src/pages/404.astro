@@ -1,0 +1,35 @@
+---
+import Base from "../layouts/Base.astro";
+---
+<Base title="Off track" description="This page doesn't exist.">
+  <div class="stage" id="stage"></div>
+  <section class="wrap msg">
+    <p class="eyebrow">404 · yellow flag</p>
+    <h1>Off <span class="red">track</span>.</h1>
+    <p class="lead">This page isn't on the circuit. Rejoin safely:</p>
+    <div class="ctas"><a class="btn primary" href="/">Back to the pits</a><a class="btn" href="/library/">Library</a><a class="btn" href="/start/">Get started</a></div>
+  </section>
+</Base>
+<style>
+  .stage { position: fixed; inset: 0; z-index: 0; }
+  .stage :global(canvas) { width: 100% !important; height: 100% !important; }
+  .msg { position: relative; z-index: 1; min-height: 100vh; display: flex; flex-direction: column; justify-content: flex-end; padding-bottom: 12vh; }
+  .ctas { display: flex; gap: 10px; flex-wrap: wrap; }
+</style>
+<script>
+  import { Stage, webglOk } from "../scripts/engine/stage";
+  import { defaultWheel } from "../data/wheels/index";
+  if (webglOk()) {
+    const stage = new Stage(document.getElementById("stage")!, defaultWheel, { shot: "hero", intro: true });
+    // the wheel's screen says so too, in the plugin's own dash format
+    stage.setDash({ Elements: [
+      { Type: "rect", X: 0, Y: 0, W: 790, H: 10, Color: "#FFD400" },
+      { Type: "label", X: 0, Y: 70, W: 790, H: 128, Text: "404", Font: 61, Color: "#FFD400", Align: "center" },
+      { Type: "label", X: 0, Y: 250, W: 790, H: 50, Text: "OFF TRACK", Font: 97, Color: "#FFFFFF", Align: "center" },
+      { Type: "label", X: 0, Y: 330, W: 790, H: 24, Text: "REJOIN SAFELY", Font: 5, Color: "#8A8F98", Align: "center" },
+      { Type: "rect", X: 0, Y: 450, W: 790, H: 10, Color: "#FFD400" },
+    ] });
+    setInterval(() => stage.car.showFlag("yellow", 3), 2500);
+    stage.car.showFlag("yellow", 3);
+  }
+</script>

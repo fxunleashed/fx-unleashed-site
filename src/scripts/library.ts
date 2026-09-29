@@ -38,8 +38,10 @@ export async function pluginState(): Promise<PluginState> {
     const ctl = new AbortController(); const tm = setTimeout(() => ctl.abort(), 1500);
     const st = await (await fetch(root + "status", { signal: ctl.signal })).json();
     clearTimeout(tm);
+    // an older plugin (no library routes) answers with an error: treat it as not there
+    if (st?.plugin !== "FX Unleashed") return { available: false };
     const installed = await (await fetch(root + "installed")).json();
-    return { available: !!st.available, version: st.version, installed };
+    return { available: !!st.available, version: st.version, installed: Array.isArray(installed) ? installed : [] };
   } catch (e) {
     return { available: false, blocked: String(e).includes("blocked") };
   }

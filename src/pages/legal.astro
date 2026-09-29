@@ -1,0 +1,43 @@
+---
+import Base from "../layouts/Base.astro";
+import DocPage from "../components/DocPage.astro";
+import { render, legal, byName } from "../lib/md";
+import { site } from "../config";
+// The texts are docs/legal/*.md in the plugin repo (the plugin shows the same ones): edit them there.
+const md = `
+## Disclaimer
+${byName(legal, "disclaimer.md")}
+
+## Firmware warning
+${byName(legal, "firmware-warning.md")}
+
+## Back to stock
+${byName(legal, "back-to-stock.md")}
+
+## Library terms
+${byName(legal, "library-terms.md")}
+
+Full terms: [TERMS.md in the library repo](https://github.com/${site.libraryRepo}/blob/main/TERMS.md).
+
+## Licences
+- **The plugin** and the tools: GPL-3.0. It comes with no warranty and no liability (GPL-3.0 sections 15 and 16).
+- **Library items**: each has its own licence, shown on its page (the ones by FX Unleashed are CC-BY-4.0).
+- **Car rev light data**: Lovely Car Data by Lovely Sim Racing and contributors, CC BY-NC-SA 4.0, downloaded by the plugin at runtime.
+- **This website**: built with Astro and three.js (MIT). Fonts: Chakra Petch, Inter, JetBrains Mono (SIL Open Font License), from Google Fonts.
+- **Trademarks**: Simagic and FX Pro are trademarks of their owner, used only to say which hardware this works with. The FX Unleashed logo and the wheel drawings are our own.
+
+## Privacy
+This site doesn't track you: no analytics, no cookies, no accounts. Fonts are loaded from Google Fonts, and the library and changelog from GitHub, so those services see your IP address like any website you visit.
+
+The library and "Install" buttons talk to the plugin on your own PC (127.0.0.1): nothing about your PC is sent anywhere. The plugin checks GitHub for updates and the library index, and downloads car light data (Lovely Car Data); it sends nothing about you.
+
+## Rights holders
+If something here uses your work without permission, open an issue on [GitHub](${site.contact}) or contact the maintainers there. Library items are taken down while it's looked at.
+`;
+const { html, toc } = render(md);
+---
+<Base title="Legal" description="Disclaimer, firmware warning, library terms, licences and privacy.">
+  <DocPage html={html} toc={toc} eyebrow="Legal">
+    <Fragment slot="before"><h1>Legal</h1><p class="lead">The short version: independent, free, no warranty, no tracking. The long version is below.</p></Fragment>
+  </DocPage>
+</Base>

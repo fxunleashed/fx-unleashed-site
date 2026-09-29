@@ -20,13 +20,14 @@ export const SHOTS: Record<string, Shot> = {
   hero: { cam: [-1.55, 0.05, 5.9], look: [-1.6, -0.05, 0], rot: [0.06, -0.38, 0.02] },
   heroNarrow: { cam: [0, -1.0, 7.4], look: [0, -1.05, 0], rot: [0.1, -0.2, 0] },
   front: { cam: [0, 0, 5.2], look: [0, 0, 0], rot: [0, 0, 0] },
-  rev: { cam: [0.1, 1.05, 2.3], look: [0, 0.62, 0], rot: [0.25, 0.05, 0] },
-  screen: { cam: [0, 0.5, 1.9], look: [0, 0.45, 0], rot: [0.05, 0, 0] },
-  controls: { cam: [-0.9, -0.55, 2.8], look: [-0.25, -0.35, 0], rot: [-0.12, 0.35, 0.04] },
-  drive: { cam: [0, -0.35, 3.9], look: [0, 0.2, 0], rot: [0.12, 0, 0] },
-  back: { cam: [2.2, 0.4, -3.7], look: [0, 0, 0], rot: [0, 0.2, 0] },
+  rev: { cam: [-0.55, 1.1, 2.9], look: [-0.62, 0.6, 0], rot: [0.28, 0.08, 0] },       // panel on the left: the bar sits right of it
+  screen: { cam: [0.52, 0.48, 2.95], look: [0.58, 0.44, 0], rot: [0.05, -0.08, 0] },    // panel on the right: the screen sits left of it
+  controls: { cam: [-0.2, -0.45, 3.3], look: [-0.75, -0.3, 0], rot: [-0.14, 0.3, 0.04] }, // panel on the left
+  drive: { cam: [0.55, -0.35, 4.3], look: [0.75, 0.2, 0], rot: [0.12, -0.05, 0] },   // panel on the right
+  back: { cam: [-2.4, -0.9, -3.9], look: [0.2, 0.1, 0], rot: [0.05, 0.35, 0] },
   side: { cam: [4.4, 0.6, 2.4], look: [0, 0, 0], rot: [0, -0.1, 0] },
-  lab: { cam: [0, 0.05, 4.4], look: [0, 0.02, 0], rot: [0, 0, 0] },
+  lab: { cam: [-0.75, 0.05, 5.9], look: [-0.8, 0.02, 0], rot: [0, 0, 0] },
+  labNarrow: { cam: [0, 0.9, 7.2], look: [0, 0.9, 0], rot: [0, 0, 0] },
   card: { cam: [0, 0.2, 5.0], look: [0, 0.05, 0], rot: [0.05, -0.25, 0] },
 };
 
@@ -111,11 +112,12 @@ export class Stage {
     this.camera = new THREE.PerspectiveCamera(32, 1, 0.1, 80);
     const pmrem = new THREE.PMREMGenerator(this.renderer);
     this.scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+    this.scene.environmentIntensity = 0.55; // the room's lights, reflected in the clear coat, stay under the bloom threshold
     if (!opts.transparent) this.scene.background = new THREE.Color(0x050608);
     this.scene.fog = new THREE.Fog(0x050608, 9, 22);
 
     // lights: a soft key from above-front, a red rim from behind, a cool fill
-    const key = new THREE.DirectionalLight(0xffffff, 1.6); key.position.set(2, 4, 5); this.scene.add(key);
+    const key = new THREE.DirectionalLight(0xffffff, 0.95); key.position.set(2, 4, 5); this.scene.add(key);
     const rimL = new THREE.PointLight(0xff1f2d, 30, 12, 2); rimL.position.set(-2.5, 1.5, -2.5); this.scene.add(rimL);
     const fill = new THREE.DirectionalLight(0x6a8cff, 0.35); fill.position.set(-4, -2, 3); this.scene.add(fill);
 
@@ -137,7 +139,7 @@ export class Stage {
     // post: bloom for the LEDs and screen, then tone mapping, then a film finish
     this.composer = new EffectComposer(this.renderer);
     this.composer.addPass(new RenderPass(this.scene, this.camera));
-    this.bloom = new UnrealBloomPass(new THREE.Vector2(512, 512), low ? 0.9 : 1.15, 0.55, 0.82);
+    this.bloom = new UnrealBloomPass(new THREE.Vector2(512, 512), low ? 0.85 : 1.05, 0.5, 1.0); // threshold 1: only HDR emitters glow
     this.composer.addPass(this.bloom);
     this.composer.addPass(new OutputPass());
     this.film = new ShaderPass(FilmShader);

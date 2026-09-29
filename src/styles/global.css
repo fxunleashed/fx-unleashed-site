@@ -31,6 +31,7 @@
 @view-transition { navigation: auto; }
 
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 html { background: var(--bg); scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
 body {
   margin: 0; background: var(--bg); color: var(--text); font: 400 16px/1.6 var(--body);

@@ -7,11 +7,15 @@
     "sync": "node scripts/sync.mjs",
     "dev": "npm run sync && astro dev",
     "build": "npm run sync && astro build",
-    "preview": "astro preview"
+    "preview": "astro preview",
+    "shots": "node scripts/shots.mjs"
   },
   "dependencies": {
     "astro": "^7.3.5",
     "marked": "^18.0.14",
     "three": "^0.186.1"
+  },
+  "devDependencies": {
+    "puppeteer-core": "^25.12.0"
   }
 }

@@ -1,0 +1,39 @@
+---
+import Base from "../layouts/Base.astro";
+import { site } from "../config";
+---
+<Base title="Changelog" description="Every FX Unleashed release, newest first.">
+  <section class="wrap page">
+    <p class="eyebrow">Changelog</p>
+    <h1>What's <span class="red">new</span></h1>
+    <p class="lead">Every release, straight from GitHub. The plugin shows the same notes when it offers an update.</p>
+    <div id="releases" class="releases"><p class="muted">Loading releases…</p></div>
+  </section>
+</Base>
+<style>
+  .page { padding: 150px 0 100px; position: relative; z-index: 1; }
+  .releases { margin-top: 40px; display: grid; gap: 16px; }
+  .releases :global(.rel) { padding: 26px 28px; border-radius: 20px; background: var(--panel-solid); border: 1px solid var(--line); }
+  .releases :global(.rel h2) { font-size: 30px; text-transform: none; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .releases :global(.tag) { font: 700 10px/1 var(--display); letter-spacing: 0.2em; text-transform: uppercase; padding: 6px 9px; border-radius: 6px; background: rgba(255,176,0,0.12); color: var(--amber); }
+  .releases :global(.date) { color: var(--text-3); font-size: 13px; }
+  .releases :global(.body) { white-space: pre-wrap; color: var(--text-2); font-size: 14.5px; margin-top: 12px; }
+</style>
+<script>
+  import { site } from "../config";
+  const box = document.getElementById("releases")!;
+  fetch(site.releasesApi).then(r => (r.ok ? r.json() : Promise.reject(r.status))).then((list: any[]) => {
+    if (!list.length) throw new Error("none");
+    box.replaceChildren(...list.filter(r => !r.draft).map(r => {
+      const el = document.createElement("article"); el.className = "rel";
+      el.innerHTML = `<h2><a></a></h2><p class="date"></p><div class="body"></div>`;
+      const a = el.querySelector("a")!; a.textContent = r.name || r.tag_name; a.href = r.html_url;
+      if (r.prerelease) { const t = document.createElement("span"); t.className = "tag"; t.textContent = "beta"; el.querySelector("h2")!.appendChild(t); }
+      el.querySelector(".date")!.textContent = new Date(r.published_at).toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" });
+      el.querySelector(".body")!.textContent = r.body || "";
+      return el;
+    }));
+  }).catch(() => {
+    box.innerHTML = `<div class="rel"><h2>The first release is on its way</h2><p class="body">Releases appear here as soon as they're published on GitHub.</p></div>`;
+  });
+</script>

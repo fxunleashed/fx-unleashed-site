@@ -30,6 +30,7 @@ if (fs.existsSync(plugin)) {
 
 if (fs.existsSync(path.join(library, "index.json"))) {
   copy(path.join(library, "index.json"), path.join(root, "public/library/index.json")); n++;
+  copy(path.join(library, "CONTRIBUTING.md"), path.join(root, "src/content/docs/library-submit.md")); n++;
   for (const kind of ["dashes", "savers"]) {
     const dir = path.join(library, kind);
     if (!fs.existsSync(dir)) continue;

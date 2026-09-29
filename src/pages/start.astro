@@ -1,0 +1,29 @@
+---
+import Base from "../layouts/Base.astro";
+import DocPage from "../components/DocPage.astro";
+import { render, docs, byName } from "../lib/md";
+// The guide is docs/setup.md in the plugin repo (npm run sync copies it): edit it there.
+const md = byName(docs, "setup.md").replace(/^﻿?\s*# [^\n]*\n/, "");
+const { html, toc } = render(md);
+---
+<Base title="Get started" description="Set up FX Unleashed from start to finish: install, firmware, wiring, game controls, dashes, lights.">
+  <DocPage html={html} toc={toc}>
+    <Fragment slot="before">
+      <h1>Get started</h1>
+      <p class="lead">From nothing to your own dashes and lights, one step at a time. Every step says what you should see, and what to do if you don't.</p>
+      <div class="quick">
+        <a class="q" href="#2-install-the-plugin"><b>1</b><span>Install the plugin</span></a>
+        <a class="q" href="#3-before-you-flash-the-risks"><b>2</b><span>Firmware</span></a>
+        <a class="q" href="#4-wiring-and-power"><b>3</b><span>Wiring</span></a>
+        <a class="q" href="#6-turn-on-unleashed-mode"><b>4</b><span>Unleash it</span></a>
+      </div>
+    </Fragment>
+  </DocPage>
+</Base>
+<style>
+  .quick { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 30px 0 40px; }
+  .q { display: flex; gap: 12px; align-items: center; padding: 16px; border-radius: 14px; border: 1px solid var(--line); background: var(--panel-solid); border-bottom: 1px solid var(--line) !important; transition: border-color 0.2s, transform 0.2s; }
+  .q:hover { border-color: var(--red) !important; transform: translateY(-2px); }
+  .q b { font: 700 28px/1 var(--display); color: var(--red); }
+  .q span { font: 600 14px/1.2 var(--display); color: #fff; letter-spacing: 0.04em; }
+</style>

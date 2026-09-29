@@ -1,0 +1,16 @@
+---
+import Base from "../../layouts/Base.astro";
+import DocPage from "../../components/DocPage.astro";
+import { DOCS } from "../../data/docs";
+import { render, docs, byName } from "../../lib/md";
+
+export function getStaticPaths() {
+  return DOCS.map(d => ({ params: { slug: d.slug }, props: { d } }));
+}
+const { d } = Astro.props;
+const { html, toc } = render(byName(docs, d.file));
+const side = [{ href: "/start/", label: "Get started" }, ...DOCS.map(x => ({ href: `/docs/${x.slug}/`, label: x.title, current: x.slug === d.slug }))];
+---
+<Base title={d.title} description={d.blurb}>
+  <DocPage html={html} toc={toc} side={side} eyebrow="Docs" />
+</Base>

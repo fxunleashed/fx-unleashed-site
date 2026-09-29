@@ -1,0 +1,22 @@
+---
+import Base from "../../layouts/Base.astro";
+import { DOCS } from "../../data/docs";
+---
+<Base title="Docs" description="Guides and references for FX Unleashed: setup, the dash designer, the dash format, the library.">
+  <section class="wrap page">
+    <p class="eyebrow">Docs</p>
+    <h1>Docs</h1>
+    <p class="lead">Everything from the first install to your own dash in the library.</p>
+    <div class="grid three list">
+      <a class="card glow" href="/start/"><span class="n">00</span><h3>Get started</h3><p>Install, firmware, wiring, game controls, dashes, lights: the whole setup, one step at a time.</p></a>
+      {DOCS.map((d, i) => <a class="card glow" href={`/docs/${d.slug}/`}><span class="n">{String(i + 1).padStart(2, "0")}</span><h3>{d.title}</h3><p>{d.blurb}</p></a>)}
+      <a class="card glow" href="/faq/"><span class="n">??</span><h3>FAQ</h3><p>The questions people ask most, answered short.</p></a>
+    </div>
+  </section>
+</Base>
+<style>
+  .page { padding: 150px 0 100px; position: relative; z-index: 1; }
+  .list { margin-top: 40px; }
+  .list .card { min-height: 200px; }
+  .n { font: 700 13px/1 var(--mono); color: var(--red); display: block; margin-bottom: 30px; }
+</style>

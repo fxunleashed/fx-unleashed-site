@@ -1,0 +1,112 @@
+---
+import Base from "../layouts/Base.astro";
+import { site } from "../config";
+---
+<Base title="Library" description="Dashes and screensavers for the FX Pro, made by the community. Preview them live, install in a click.">
+  <section class="wrap head">
+    <p class="eyebrow">Community library</p>
+    <h1>The <span class="red">library</span></h1>
+    <p class="lead">Dashes and screensavers made by drivers. Hover to see one run, open it to put it on the wheel, install it in a click. Every item is checked for size, format and scripts before it's listed.</p>
+    <div class="status" id="plugin-status"><span class="dot"></span><span class="txt">Looking for the plugin on this PC…</span></div>
+  </section>
+
+  <section class="wrap controls" aria-label="Filter">
+    <div class="seg" role="tablist" id="kind">
+      <button role="tab" data-kind="all" aria-selected="true">All</button>
+      <button role="tab" data-kind="dash" aria-selected="false">Dashes</button>
+      <button role="tab" data-kind="saver" aria-selected="false">Screensavers</button>
+    </div>
+    <input type="search" id="q" placeholder="Search name, author, tag, car…" aria-label="Search" />
+    <select id="game" aria-label="Game"><option value="">Any game</option></select>
+    <select id="sort" aria-label="Sort"><option value="new">Newest</option><option value="name">Name</option><option value="light">Lightest on the wheel</option></select>
+  </section>
+  <section class="wrap"><div class="tags" id="tags"></div><div class="grid-lib" id="grid"></div><p class="empty" id="empty" hidden>Nothing matches. Try fewer filters.</p></section>
+
+  <section class="wrap submit">
+    <div class="card">
+      <h3>Made one?</h3>
+      <p>Package it from the plugin (Dashes tab, "Package for the library") and open a pull request. The checks run by themselves.</p>
+      <a class="btn" href="/docs/library-submit/">How to submit</a>
+      <a class="btn small" href={`https://github.com/${site.libraryRepo}`}>Library repo</a>
+    </div>
+  </section>
+
+  <dialog id="item" aria-labelledby="item-name">
+    <div class="modal">
+      <div class="viewer" id="viewer"></div>
+      <div class="info">
+        <button class="close" id="close" aria-label="Close">×</button>
+        <p class="eyebrow" id="item-kind">Dash</p>
+        <h2 id="item-name">Name</h2>
+        <p class="by" id="item-by"></p>
+        <p id="item-desc"></p>
+        <dl class="facts" id="item-facts"></dl>
+        <div class="chips" id="item-tags"></div>
+        <div class="actions">
+          <button class="btn primary" id="install">Install in the plugin</button>
+          <a class="btn" id="download" download>Download .json</a>
+        </div>
+        <p class="note" id="install-note"></p>
+        <p class="terms">Made by the community, not by FX Unleashed or Simagic. Checked for size, format and no scripts; install at your own risk. <a href="/legal/#library-terms">Library terms</a></p>
+      </div>
+    </div>
+  </dialog>
+</Base>
+
+<style>
+  .head { padding: 150px 0 20px; position: relative; z-index: 1; }
+  .status { display: inline-flex; align-items: center; gap: 10px; margin-top: 10px; padding: 10px 16px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel-solid); font-size: 13px; color: var(--text-2); }
+  .status .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--text-3); }
+  .status.ok .dot { background: var(--green); box-shadow: 0 0 10px var(--green); }
+  .status.no .dot { background: var(--amber); }
+  .controls { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 30px; position: sticky; top: 72px; z-index: 5; padding: 12px 0; background: linear-gradient(var(--bg) 70%, transparent); }
+  .seg { display: inline-flex; padding: 4px; border-radius: 999px; background: var(--panel-solid); border: 1px solid var(--line); }
+  .seg button { border: 0; background: none; color: var(--text-2); padding: 9px 16px; border-radius: 999px; font: 600 12px/1 var(--display); letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; }
+  .seg button[aria-selected="true"] { background: var(--red); color: #fff; }
+  input[type="search"], select { background: var(--panel-solid); border: 1px solid var(--line); color: var(--text); border-radius: 999px; padding: 11px 16px; font: 14px var(--body); }
+  input[type="search"] { flex: 1; min-width: 220px; }
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 24px; }
+  .grid-lib { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(340px, 100%), 1fr)); gap: 20px; perspective: 1200px; }
+  .empty { text-align: center; padding: 60px; color: var(--text-3); }
+  .submit { padding: 80px 0 120px; }
+  .submit .card { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
+  .submit .card h3 { margin: 0 20px 0 0; }
+  .submit .card p { margin: 0; flex: 1 1 300px; }
+
+  dialog { padding: 0; border: 0; background: transparent; max-width: min(1180px, 96vw); width: 100%; color: var(--text); }
+  dialog::backdrop { background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(8px); }
+  .modal { display: grid; grid-template-columns: 1.35fr 1fr; min-height: 560px; border-radius: 24px; overflow: hidden; border: 1px solid var(--line-2); background: #07080a; box-shadow: 0 50px 120px -30px rgba(255, 31, 45, 0.35); }
+  .viewer { position: relative; min-height: 420px; background: radial-gradient(circle at 50% 40%, #1a0508, #050608 70%); }
+  .viewer :global(canvas) { position: absolute; inset: 0; width: 100% !important; height: 100% !important; }
+  .info { position: relative; padding: 36px 32px; overflow-y: auto; max-height: 90vh; }
+  .close { position: absolute; top: 14px; right: 14px; width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--line-2); background: rgba(255,255,255,0.04); color: #fff; font-size: 22px; cursor: pointer; }
+  .info h2 { font-size: 40px; }
+  .by { color: var(--text-3); margin-top: -6px; }
+  .facts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 20px; margin: 20px 0; }
+  .facts :global(div) { padding: 12px 14px; border-radius: 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--line); }
+  .facts :global(dt) { font: 600 10px/1 var(--display); letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-3); }
+  .facts :global(dd) { margin: 6px 0 0; font: 600 16px/1.2 var(--display); }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 22px; }
+  .actions { display: flex; gap: 10px; flex-wrap: wrap; }
+  .note { margin-top: 14px; font-size: 13px; min-height: 1.4em; }
+  .terms { font-size: 12px; color: var(--text-3); margin-top: 20px; }
+  .terms a { color: var(--red-2); }
+  @media (max-width: 900px) { .modal { grid-template-columns: 1fr; } .viewer { min-height: 300px; } .controls { top: 64px; } }
+</style>
+<style is:global>
+  .lib-item { position: relative; border-radius: 18px; overflow: hidden; border: 1px solid var(--line); background: #0b0c0f; cursor: pointer; transform-style: preserve-3d; transition: transform 0.35s var(--ease), box-shadow 0.35s, border-color 0.35s; }
+  .lib-item:hover { border-color: rgba(255,31,45,0.5); box-shadow: 0 40px 80px -30px rgba(255,31,45,0.45); }
+  .lib-item .shot { position: relative; aspect-ratio: 5 / 3; background: #000; }
+  .lib-item .shot img, .lib-item .shot canvas { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .lib-item .shot canvas { opacity: 0; transition: opacity 0.3s; }
+  .lib-item.live .shot canvas { opacity: 1; }
+  .lib-item .live-tag { position: absolute; top: 10px; left: 10px; padding: 5px 9px; border-radius: 6px; font: 700 10px/1 var(--display); letter-spacing: 0.2em; background: rgba(255,31,45,0.9); color: #fff; opacity: 0; transition: opacity 0.3s; }
+  .lib-item.live .live-tag { opacity: 1; }
+  .lib-item .meta { padding: 16px 18px 18px; }
+  .lib-item h3 { margin: 0 0 4px; font-size: 20px; }
+  .lib-item p { margin: 0; font-size: 13px; color: var(--text-3); }
+  .lib-item .kind { position: absolute; top: 10px; right: 10px; padding: 5px 9px; border-radius: 6px; font: 700 10px/1 var(--display); letter-spacing: 0.2em; text-transform: uppercase; background: rgba(0,0,0,0.6); color: var(--text-2); border: 1px solid var(--line-2); }
+  .lib-item .installed { color: var(--green); }
+</style>
+
+<script src="../scripts/libraryPage.ts"></script>

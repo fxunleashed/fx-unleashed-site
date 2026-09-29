@@ -19,7 +19,7 @@ if (webglOk()) {
 
   // ---------- scroll: blend the camera between the chapters' shots ----------
   const chapters = [...document.querySelectorAll<HTMLElement>(".chapter")];
-  const solid = document.querySelector<HTMLElement>(".solid");
+  const solid = document.querySelector<HTMLElement>(".after-film");
   let current = "hero";
   function onScroll() {
     const mid = scrollY + innerHeight * 0.5;
@@ -39,7 +39,6 @@ if (webglOk()) {
   }
   addEventListener("scroll", onScroll, { passive: true });
   addEventListener("resize", onScroll);
-  onScroll();
 
   // ---------- presets ----------
   document.querySelectorAll<HTMLButtonElement>("#presets [data-preset]").forEach(b => b.addEventListener("click", () => {
@@ -134,6 +133,8 @@ if (webglOk()) {
     }
     sound.update(car.s.rpm, car.s.throttle, car.s.limiter);
   };
+
+  onScroll(); // after everything it uses exists
 
   // ---------- dashes from the library ----------
   loadIndex().then(index => {

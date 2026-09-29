@@ -1,0 +1,53 @@
+---
+// A long Markdown page with a sticky table of contents and a reading-progress bar (guide, docs, legal).
+import type { TocEntry } from "../lib/md";
+interface Props { html: string; toc: TocEntry[]; eyebrow?: string; side?: { href: string; label: string; current?: boolean }[] }
+const { html, toc, eyebrow, side } = Astro.props;
+---
+<div class="progress" aria-hidden="true"><span id="progress"></span></div>
+<div class="doc wrap">
+  <aside class="side">
+    {side && <nav class="sidenav" aria-label="Pages">{side.map(s => <a href={s.href} aria-current={s.current ? "page" : undefined}>{s.label}</a>)}</nav>}
+    {toc.length > 0 && (
+      <nav class="toc" aria-label="On this page">
+        <p class="eyebrow">On this page</p>
+        {toc.map(t => <a href={`#${t.id}`} class={`d${t.depth}`} data-id={t.id}>{t.text}</a>)}
+      </nav>
+    )}
+  </aside>
+  <article class="prose">
+    {eyebrow && <p class="eyebrow">{eyebrow}</p>}
+    <slot name="before" />
+    <Fragment set:html={html} />
+    <slot />
+  </article>
+</div>
+<style>
+  .progress { position: fixed; top: 0; left: 0; right: 0; height: 2px; z-index: 60; }
+  .progress span { display: block; height: 100%; width: 0; background: var(--red); box-shadow: 0 0 12px var(--red); }
+  .doc { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 60px; padding: 130px 0 100px; position: relative; z-index: 1; }
+  .side { position: sticky; top: 100px; align-self: start; max-height: calc(100vh - 120px); overflow-y: auto; }
+  .sidenav, .toc { display: flex; flex-direction: column; gap: 2px; margin-bottom: 30px; }
+  .sidenav a { padding: 10px 14px; border-radius: 10px; font: 600 14px/1.2 var(--display); letter-spacing: 0.04em; color: var(--text-2); }
+  .sidenav a[aria-current="page"] { background: rgba(255,31,45,0.1); color: #fff; box-shadow: inset 2px 0 0 var(--red); }
+  .toc a { padding: 5px 10px; border-left: 1px solid var(--line); font-size: 13px; color: var(--text-3); transition: color 0.2s, border-color 0.2s; }
+  .toc a.d3 { padding-left: 22px; }
+  .toc a.on { color: #fff; border-color: var(--red); }
+  .prose :global(h2), .prose :global(h3) { scroll-margin-top: 100px; position: relative; }
+  .prose :global(.anchor) { position: absolute; left: -1.1em; color: var(--red); opacity: 0; border: 0; transition: opacity 0.2s; }
+  .prose :global(h2:hover .anchor), .prose :global(h3:hover .anchor) { opacity: 1; }
+  @media (max-width: 960px) { .doc { grid-template-columns: 1fr; gap: 20px; } .side { position: static; max-height: none; } .toc { display: none; } }
+</style>
+<script>
+  const bar = document.getElementById("progress")!;
+  const links = [...document.querySelectorAll<HTMLAnchorElement>(".toc a")];
+  const heads = links.map(a => document.getElementById(a.dataset.id!)).filter(Boolean) as HTMLElement[];
+  const onScroll = () => {
+    const h = document.documentElement.scrollHeight - innerHeight;
+    bar.style.width = (h > 0 ? (scrollY / h) * 100 : 0) + "%";
+    let cur = heads[0];
+    for (const x of heads) if (x.getBoundingClientRect().top < 140) cur = x;
+    links.forEach(a => a.classList.toggle("on", a.dataset.id === cur?.id));
+  };
+  addEventListener("scroll", onScroll, { passive: true }); onScroll();
+</script>

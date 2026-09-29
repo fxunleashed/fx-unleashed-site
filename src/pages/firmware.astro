@@ -1,0 +1,71 @@
+---
+import Base from "../layouts/Base.astro";
+import { render, legal, byName } from "../lib/md";
+import { BUILDS, LAYERS } from "../data/firmware";
+const warning = render(byName(legal, "firmware-warning.md")).html;
+const back = render(byName(legal, "back-to-stock.md")).html;
+---
+<Base title="Firmware" description="How the FX Unleashed wheel app is built and checked, what each build changes, and how to go back to stock.">
+  <section class="wrap page">
+    <p class="eyebrow">Firmware</p>
+    <h1>Built <span class="red">carefully</span>.</h1>
+    <p class="lead">Unleashed mode needs a modified version of the wheel's own app. Here's what it changes, how every build is checked, and how to go back.</p>
+
+    <div class="warning prose" role="note">
+      <p class="eyebrow">Read this first</p>
+      <Fragment set:html={warning} />
+    </div>
+
+    <h2 class="reveal">Six layers of safety</h2>
+    <ol class="layers">
+      {LAYERS.map((l, i) => (
+        <li class="reveal" style={`--i:${i}`}>
+          <span class="ring" aria-hidden="true"></span>
+          <div><h3>{l.title}</h3><p>{l.text}</p></div>
+        </li>
+      ))}
+    </ol>
+
+    <h2 class="reveal">Builds</h2>
+    <div class="timeline">
+      {BUILDS.map(b => (
+        <div class={`build reveal ${b.status}`}>
+          <span class="n">{b.n}</span>
+          <div><h3>{b.title} <span class="st">{b.status}</span></h3><p>{b.text}</p></div>
+        </div>
+      ))}
+    </div>
+
+    <h2 class="reveal" id="back-to-stock">Back to stock</h2>
+    <div class="prose reveal">
+      <ol>
+        <li>Check SimPro's copy of the wheel app is Simagic's original (after installing the modified one you put the original back, so it is).</li>
+        <li>Wheel on USB, base on. In SimPro: Device, FX Pro, Firmware: reinstall wheel app 1.3.11.</li>
+        <li>Wait until SimPro says it's done. If it hangs after the wheel enters boot mode, close SimPro, start it again and reinstall: it installs to a wheel that's already in boot mode.</li>
+        <li>That's Simagic's own firmware again. The plugin's Wheel tab shows no patch build.</li>
+      </ol>
+      <Fragment set:html={back} />
+    </div>
+  </section>
+</Base>
+<style>
+  .page { padding: 150px 0 100px; position: relative; z-index: 1; }
+  .warning { margin: 40px 0 80px; padding: 28px 30px; border-radius: 20px; border: 1px solid rgba(255, 176, 0, 0.35); background: linear-gradient(180deg, rgba(255,176,0,0.07), rgba(255,176,0,0.02)); max-width: none; }
+  .warning :global(p), .warning :global(li) { color: var(--text); }
+  .warning .eyebrow { color: var(--amber); }
+  .warning .eyebrow::before { background: var(--amber); box-shadow: 0 0 12px var(--amber); }
+  h2 { margin-top: 80px; }
+  .layers { list-style: none; padding: 0; margin: 30px 0; display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(min(360px, 100%), 1fr)); counter-reset: l; }
+  .layers li { display: flex; gap: 18px; padding: 22px; border-radius: 18px; background: var(--panel-solid); border: 1px solid var(--line); }
+  .ring { flex: none; width: 46px; height: 46px; border-radius: 50%; border: 2px solid var(--red); box-shadow: 0 0 20px var(--red-glow), inset 0 0 12px var(--red-glow); position: relative; }
+  .ring::after { counter-increment: l; content: counter(l); position: absolute; inset: 0; display: grid; place-items: center; font: 700 18px var(--display); }
+  .layers h3 { margin-bottom: 6px; }
+  .layers p { margin: 0; }
+  .timeline { position: relative; margin: 30px 0; padding-left: 30px; border-left: 2px solid var(--line); display: grid; gap: 18px; }
+  .build { display: flex; gap: 20px; align-items: flex-start; position: relative; }
+  .build::before { content: ""; position: absolute; left: -38px; top: 14px; width: 14px; height: 14px; border-radius: 50%; background: var(--green); box-shadow: 0 0 12px var(--green); }
+  .build.next::before { background: var(--amber); box-shadow: 0 0 12px var(--amber); }
+  .n { font: 700 44px/1 var(--display); color: var(--red); min-width: 50px; }
+  .st { font: 700 10px/1 var(--display); letter-spacing: 0.2em; text-transform: uppercase; padding: 5px 8px; border-radius: 6px; background: rgba(33,224,122,0.12); color: var(--green); vertical-align: middle; margin-left: 8px; }
+  .next .st { background: rgba(255,176,0,0.12); color: var(--amber); }
+</style>
