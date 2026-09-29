@@ -169,17 +169,153 @@ export function buildWheel(w: Wheel, opts: { quality?: "high" | "low" } = {}): W
     strip.position.copy(toLocal((x0 + x1) / 2, y, front + 0.078));
     group.add(strip);
   }
+  // Buttons and encoders, modelled on the real wheel (checked against the maker's product photos):
+  // - a button: thick black bezel, dark glass cap, the LED as a ring of light round the cap's edge and a glow in the
+  //   middle where the real caps have their icon (their icons aren't copied);
+  // - an encoder: a black plate (a circle with a label tab, BB a keyhole) edged with a thin line of light, the tab lit
+  //   with its label, and a black knob on a dark knurled ring.
+  const btnBezel = keep(new THREE.MeshStandardMaterial({ color: 0x121317, metalness: 0.6, roughness: 0.3 }));
+  const capGlass = keep(new THREE.MeshPhysicalMaterial({ color: 0x07080a, metalness: 0, roughness: 0.08, clearcoat: 1, clearcoatRoughness: 0.05 }));
+  const knurlMat = keep(new THREE.MeshStandardMaterial({ color: 0x2b2d32, metalness: 1, roughness: 0.22 }));
+  const knobTop = keep(new THREE.MeshPhysicalMaterial({ color: 0x0a0b0d, metalness: 0.2, roughness: 0.25, clearcoat: 1, clearcoatRoughness: 0.1 }));
+  const plateMat = keep(new THREE.MeshPhysicalMaterial({ color: 0x0b0c0f, metalness: 0.5, roughness: 0.35, clearcoat: 0.6 }));
+  const upright = <T extends THREE.BufferGeometry>(g: T) => { g.rotateX(Math.PI / 2); return g; }; // axis Y -> out of the face
+  /** Lathe profile [radius, height] in world units (listed from the top down), stood up on the face. */
+  const lathe = (pts: [number, number][], seg = 64) =>
+    keep(upright(new THREE.LatheGeometry(pts.map(([r, h]) => new THREE.Vector2(r, h)).reverse(), seg)));
+  /** A cylinder with rounded flutes round its side (the knurled ring). */
+  const fluted = (r: number, h: number, flutes: number, depth: number) => {
+    const g = new THREE.CylinderGeometry(r, r, h, flutes * 8, 1);
+    const pos = g.attributes.position;
+    for (let i = 0; i < pos.count; i++) {
+      const x = pos.getX(i), z = pos.getZ(i), rr = Math.hypot(x, z);
+      if (rr < r * 0.5) continue;
+      const f = 1 - depth * Math.pow(Math.max(0, Math.cos(Math.atan2(z, x) * flutes)), 2);
+      pos.setX(i, x * f); pos.setZ(i, z * f);
+    }
+    g.computeVertexNormals();
+    return keep(upright(g));
+  };
+  /** Label text as a transparent texture (dark letters for a lit tab). */
+  const labelTexture = (text: string) => {
+    const cv = canvas(256, 96), c = cv.getContext("2d")!;
+    c.fillStyle = "#050506"; c.font = "800 64px 'Chakra Petch', 'Arial Black', sans-serif";
+    c.textAlign = "center"; c.textBaseline = "middle"; c.fillText(text, 128, 52);
+    const tx = keep(new THREE.CanvasTexture(cv)); tx.colorSpace = THREE.SRGBColorSpace; tx.anisotropy = 8;
+    return tx;
+  };
+  // encoder plates, in definition units round the knob: [label, tab direction (x, y down), tab kind]
+  const ENC: Record<number, [string, number, number, "tab" | "key"]> = {
+    12: ["ABS", 1, 1, "tab"], 13: ["TC", -1, 1, "tab"], 14: ["BB", 0, 1, "key"], 15: ["DIFF", 1, -1, "tab"], 16: ["MAP", -1, -1, "tab"],
+  };
+  /** Plate outline: for each direction, the distance to the edge of (circle R) + (tab), sampled along the ray. */
+  const plateRadii = (R: number, dx: number, dy: number, kind: "tab" | "key", n = 160) => {
+    const l = Math.hypot(dx, dy) || 1, ux = dx / l, uy = dy / l;
+    // tab: a rounded box centred out along the direction; key: a narrower one straight down
+    const cxT = ux * R * (kind === "key" ? 1.05 : 0.8), cyT = uy * R * (kind === "key" ? 1.05 : 0.8);
+    const hw = R * (kind === "key" ? 0.46 : 0.74), hh = R * (kind === "key" ? 0.5 : 0.74), cr = R * 0.2;
+    const inTab = (x: number, y: number) => {
+      const qx = Math.abs(x - cxT) - (hw - cr), qy = Math.abs(y - cyT) - (hh - cr);
+      return Math.hypot(Math.max(qx, 0), Math.max(qy, 0)) + Math.min(Math.max(qx, qy), 0) <= cr;
+    };
+    const out: number[] = [];
+    for (let i = 0; i < n; i++) {
+      const a = (i / n) * Math.PI * 2, cx = Math.cos(a), cy = Math.sin(a);
+      let d = R;
+      for (let s = R; s < R * 2.6; s += R * 0.01) if (inTab(cx * s, cy * s)) d = s;
+      out.push(d);
+    }
+    // soften the joins between circle and tab
+    return out.map((_, i) => { let s = 0; for (let j = -3; j <= 3; j++) s += out[(i + j + n) % n]; return s / 7; });
+  };
+  const outlineShape = (radii: number[], inset: number, sx: number, sy: number) => {
+    const s = new THREE.Shape(), n = radii.length;
+    for (let i = 0; i < n; i++) {
+      const a = (i / n) * Math.PI * 2, r = (radii[i] - inset) * k;
+      const x = Math.cos(a) * r * sx, y = -Math.sin(a) * r * sy; // definition y is down
+      if (i === 0) s.moveTo(x, y); else s.lineTo(x, y);
+    }
+    s.closePath();
+    return s;
+  };
+
   for (const led of w.leds) {
     const mat = keep(new THREE.MeshBasicMaterial({ color: 0x000000, toneMapped: false }));
-    // every LED is a light on the face: button and encoder LEDs too (no caps or knobs drawn)
-    const big = led.group === "buttons" || led.group === "encoders";
-    const mesh = new THREE.Mesh(keep(new THREE.SphereGeometry((led.group === "encoders" ? 22 : big ? 11 : led.r * 1.05) * k, 24, 12)), mat);
-    mesh.scale.z = 0.45;
-    mesh.position.copy(toLocal(led.x, led.y, front + (big ? 0.004 : 0.072)));
+    let mesh: THREE.Mesh;
+    if (led.group === "buttons") {
+      const r = led.r * k, h = 0.045;
+      const ctl = new THREE.Group();
+      ctl.position.copy(toLocal(led.x, led.y, front));
+      // bezel: a thick ring with rounded top edges
+      ctl.add(new THREE.Mesh(lathe([[r * 0.8, h * 0.95], [r * 0.86, h], [r * 1.02, h], [r * 1.1, h * 0.85], [r * 1.15, h * 0.5], [r * 1.16, 0], [r * 0.8, 0]]), btnBezel));
+      // dark glass cap, slightly domed, sunk a little into the bezel
+      ctl.add(new THREE.Mesh(lathe([[0, h * 0.86], [r * 0.4, h * 0.85], [r * 0.66, h * 0.8], [r * 0.76, h * 0.72], [r * 0.79, h * 0.4]], 48), capGlass));
+      // the LED: a ring of light round the cap's edge and a soft glow in the middle
+      mesh = new THREE.Mesh(keep(new THREE.TorusGeometry(r * 0.72, r * 0.045, 8, 64)), mat);
+      mesh.position.z = h * 0.78;
+      ctl.add(mesh);
+      const dot = new THREE.Mesh(keep(new THREE.CircleGeometry(r * 0.3, 32)), mat);
+      dot.position.z = h * 0.87;
+      ctl.add(dot);
+      group.add(ctl);
+    } else if (led.group === "encoders") {
+      const [label, dx, dy, kind] = ENC[led.i] ?? ["", 0, 1, "key"];
+      const R = 25; // plate radius round the knob, definition units
+      const radii = plateRadii(R, dx, dy, kind);
+      const ctl = new THREE.Group();
+      ctl.position.copy(toLocal(led.x, led.y, front));
+      // black plate, a little proud of the carbon
+      const plateGeo = keep(new THREE.ExtrudeGeometry(outlineShape(radii, 1.2, 1, 1), { depth: 0.012, bevelEnabled: true, bevelThickness: 0.004, bevelSize: 0.004, bevelSegments: 2 }));
+      ctl.add(new THREE.Mesh(plateGeo, plateMat));
+      // the LED: a thin line of light round the plate's edge
+      const edge = outlineShape(radii, 0, 1, 1);
+      const inner = outlineShape(radii, 2.2, 1, 1);
+      edge.holes.push(new THREE.Path(inner.getPoints().reverse()));
+      mesh = new THREE.Mesh(keep(new THREE.ShapeGeometry(edge)), mat);
+      mesh.position.z = 0.0175;
+      ctl.add(mesh);
+      // lit label tab
+      if (label) {
+        // the lit label sits in the tab's outer corner, level (as on the wheel)
+        const lx = kind === "key" ? 0 : dx * R * 0.72, ly = kind === "key" ? R * 1.3 : dy * R * 0.98;
+        const lw = (kind === "key" ? 0.62 : 1.0) * R, lh = (kind === "key" ? 0.42 : 0.46) * R;
+        const tab = new THREE.Mesh(keep(new RoundedBoxGeometry(lw * k, lh * k, 0.002, 2, 0.12 * R * k)), mat);
+        tab.position.set(lx * k, -ly * k, 0.0175);
+        ctl.add(tab);
+        const txt = new THREE.Mesh(keep(new THREE.PlaneGeometry(lw * k * 0.95, lw * k * 0.95 * 96 / 256)),
+          keep(new THREE.MeshBasicMaterial({ map: labelTexture(label), transparent: true, depthWrite: false })));
+        txt.position.set(lx * k, -ly * k, 0.0195);
+        ctl.add(txt);
+      }
+      // knob: knurled dark ring at the base, glossy black top
+      const kr = 16 * k, kh = 0.055, kt = 0.014 + kh, top = kt + 0.035;
+      const knurl = new THREE.Mesh(fluted(kr, kh, 12, 0.1), knurlMat);
+      knurl.position.z = 0.014 + kh / 2;
+      ctl.add(knurl);
+      // flat black top with a small chamfer, standing on the knurled ring
+      ctl.add(new THREE.Mesh(lathe([[0, top], [kr * 0.56, top], [kr * 0.62, top - 0.005], [kr * 0.64, top - 0.014], [kr * 0.64, kt - 0.004]], 48), knobTop));
+      group.add(ctl);
+    } else {
+      mesh = new THREE.Mesh(keep(new THREE.SphereGeometry(led.r * 1.05 * k, 20, 12)), mat);
+      mesh.scale.z = 0.45;
+      mesh.position.copy(toLocal(led.x, led.y, front + 0.072));
+      group.add(mesh);
+    }
     mesh.userData.index = led.i;
     ledMeshes[led.i] = mesh;
     ledMats[led.i] = mat;
-    group.add(mesh);
+  }
+
+  // the 7-way switch below BB: a small black knob on a knurled ring, no light
+  {
+    const sx = w.size[0] / 2, sy = 311, kr = 8.5 * k;
+    const ctl = new THREE.Group();
+    ctl.position.copy(toLocal(sx, sy, front));
+    const knurl = new THREE.Mesh(fluted(kr, 0.03, 8, 0.1), knurlMat);
+    knurl.position.z = 0.015;
+    ctl.add(knurl);
+    ctl.add(new THREE.Mesh(lathe([[0, 0.07], [kr * 0.6, 0.068], [kr * 0.78, 0.058], [kr * 0.82, 0.02]], 32), knobTop));
+    group.add(ctl);
   }
 
   // ----- paddles and quick release, behind -----
@@ -208,10 +344,11 @@ export function buildWheel(w: Wheel, opts: { quality?: "high" | "low" } = {}): W
     for (const led of w.leds) {
       const f = frame[led.i], m = ledMats[led.i];
       if (!f || !m) continue;
-      const boost = led.group === "buttons" || led.group === "encoders" ? 1.3 : 2.5;
+      const boost = led.group === "buttons" ? 1.8 : led.group === "encoders" ? 1.15 : 2.5;
+      const off = 0.012;
       const a = f.a;
-      // a dim smoky lens when off, HDR colour when lit (the bloom pass makes the glow)
-      m.color.setRGB(0.012 + f.c[0] * a * boost, 0.01 + f.c[1] * a * boost, 0.012 + f.c[2] * a * boost);
+      // HDR colour when lit (the bloom pass makes the glow)
+      m.color.setRGB(off + f.c[0] * a * boost, off * 0.95 + f.c[1] * a * boost, off + f.c[2] * a * boost);
     }
   }
 
