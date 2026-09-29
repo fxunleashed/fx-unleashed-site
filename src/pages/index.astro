@@ -50,7 +50,7 @@ const features = [
       <h2>Every light.<br />Any colour.</h2>
       <p>Rev bar, side lights, button caps, encoder rings: {w.leds.length} LEDs, each its own colour, 60 times a second. Shift lights follow each car's real data.</p>
       <div class="chips" id="presets">
-        {PRESETS.map((p, i) => <button class="chip" data-preset={p.id} aria-pressed={i === 0 ? "true" : "false"}><span class="dot" style={`background:${p.rev[p.rev.length - 1]};color:${p.rev[p.rev.length - 1]}`}></span>{p.name}</button>)}
+        {PRESETS.map((p, i) => <button class="chip" data-preset={p.id} aria-pressed={i === 0 ? "true" : "false"}><span class="dot" style={`background:${p.swatch};color:${p.rev[p.rev.length - 1]}`}></span>{p.name}</button>)}
       </div>
       <div class="row">
         <button class="btn primary" id="rev-btn">Hold to rev</button>

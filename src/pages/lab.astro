@@ -17,7 +17,7 @@ const groups = Object.entries(defaultWheel.groups);
         <div class="presets">
           {PRESETS.map((p, i) => (
             <button class="preset" data-preset={p.id} aria-pressed={i === 0 ? "true" : "false"}>
-              <span class="bar" style={`background:linear-gradient(90deg,${p.rev.join(",")})`}></span>
+              <span class="bar" style={`background:${p.swatch}`}></span>
               <b>{p.name}</b><small>{p.blurb}</small>
             </button>
           ))}
