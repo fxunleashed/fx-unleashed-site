@@ -1,0 +1,35 @@
+---
+import { site, disclaimer, nav } from "../config";
+import { wheels } from "../data/wheels/index";
+const year = new Date().getFullYear();
+---
+<footer class="foot">
+  <div class="wrap">
+    <div class="top">
+      <div class="about">
+        <img src="/brand/lockup.png" alt={site.name} width="300" height="47" loading="lazy" />
+        <p>Free and open source (GPL-3.0). Made by sim racers, for sim racers.</p>
+      </div>
+      <div class="cols">
+        <div><h4>Site</h4>{nav.map(n => <a href={n.href}>{n.label}</a>)}</div>
+        <div><h4>Wheels</h4>{wheels.map(w => <a href={`/wheels/${w.id}/`}>{w.maker} {w.name}</a>)}<a href="/wheels/">All wheels</a></div>
+        <div><h4>Project</h4><a href={site.github}>GitHub</a><a href={`https://github.com/${site.libraryRepo}`}>Library repo</a><a href="/legal/">Legal and licences</a><a href="/legal/#privacy">Privacy</a><a href={site.contact}>Contact</a></div>
+      </div>
+    </div>
+    <p class="disclaimer">{disclaimer}</p>
+    <p class="small">© {year} FX Unleashed contributors. Car rev light data: Lovely Car Data (CC BY-NC-SA 4.0).</p>
+  </div>
+</footer>
+<style>
+  .foot { position: relative; z-index: 1; border-top: 1px solid var(--line); padding: 70px 0 40px; background: linear-gradient(180deg, transparent, rgba(255, 31, 45, 0.03)); }
+  .top { display: flex; gap: 40px; justify-content: space-between; flex-wrap: wrap; }
+  .about { max-width: 340px; }
+  .about p { margin-top: 16px; font-size: 14px; }
+  .cols { display: flex; gap: 60px; flex-wrap: wrap; }
+  .cols div { display: flex; flex-direction: column; gap: 8px; }
+  h4 { font-size: 12px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--text); margin-bottom: 6px; }
+  .cols a { color: var(--text-2); font-size: 14px; }
+  .cols a:hover { color: #fff; }
+  .disclaimer { margin-top: 50px; font-size: 12.5px; color: var(--text-3); max-width: 100ch; }
+  .small { font-size: 12px; color: var(--text-3); }
+</style>

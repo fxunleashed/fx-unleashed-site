@@ -1,0 +1,295 @@
+---
+import Base from "../layouts/Base.astro";
+import { wheels, defaultWheel } from "../data/wheels/index";
+import { PRESETS } from "../scripts/engine/lights";
+import { site } from "../config";
+const w = defaultWheel;
+const features = [
+  { icon: "◎", title: "Community library", text: "Dashes and screensavers made by other drivers. Preview them live, install in a click, no restart.", href: "/library/" },
+  { icon: "✎", title: "Dash designer", text: "Draw your own dash in the browser, see it on the wheel as you edit, check it can't flicker or lag.", href: "/docs/dash-designer/" },
+  { icon: "◉", title: "Screen mirror", text: "An OBS browser source with your wheel's screen and lights, live. Nobody else can show this wheel on stream.", href: "/docs/setup/#7-dashes" },
+  { icon: "⚙", title: "SimHub LED device", text: "Your wheel shows up in SimHub's Devices: any SimHub LED profile, or ATSR-Hub, drives all 38 lights.", href: "/docs/setup/#8-lights" },
+  { icon: "⛭", title: "Per car, per game", text: "Dashes, light presets, even your base's rotation and force follow the car you drive.", href: "/docs/setup/" },
+  { icon: "⚑", title: "Alerts that matter", text: "Flags, spotter, pit limiter, ABS and TC, low fuel, custom alerts from any SimHub value, in your order.", href: "/lab/" },
+  { icon: "☾", title: "Night mode", text: "A ceiling for every light and a dimmer screen, on a schedule or with ATSR-Hub's night mode.", href: "/docs/setup/#8-lights" },
+  { icon: "⟳", title: "Updates itself", text: "One click installs a new version, one click rolls it back. Your settings come with you.", href: "/changelog/" },
+];
+---
+<Base>
+  <div id="stage" class="stage" aria-hidden="true">
+    <img class="stage-fallback" src="/brand/mark-512.png" alt="" />
+  </div>
+  <div class="hud" id="hud" aria-hidden="true"><div><b id="hud-speed">0</b><span>km/h</span></div><div class="gear"><b id="hud-gear">N</b></div><div><b id="hud-rpm">0</b><span>rpm</span></div></div>
+
+  <!-- 1. hero -->
+  <section class="chapter hero" data-shot="hero">
+    <div class="wrap">
+      <p class="eyebrow">{w.maker} {w.name} · SimHub · free</p>
+      <h1 class="title"><span>Your wheel.</span><span class="red">Unleashed.</span></h1>
+      <p class="lead">Your own dashes on the {w.screen.px[0]}×{w.screen.px[1]} screen. All {w.leds.length} lights in any colour. Screensavers, a community library and the dash button, all driven from SimHub.</p>
+      <div class="ctas">
+        <a class="btn primary" href="/start/">Get started <span aria-hidden="true">→</span></a>
+        <a class="btn" href="/library/">Browse the library</a>
+      </div>
+      <dl class="stats">
+        <div><dt>{w.leds.length}</dt><dd>lights, any colour</dd></div>
+        <div><dt>60</dt><dd>light frames a second</dd></div>
+        <div><dt>1-click</dt><dd>dash installs</dd></div>
+        <div><dt>€0</dt><dd>free, open source</dd></div>
+      </dl>
+    </div>
+    <a class="scroll-hint" href="#lights" aria-label="Scroll"><span></span></a>
+  </section>
+
+  <!-- 2. lights -->
+  <section class="chapter" id="lights" data-shot="rev">
+    <div class="wrap"><div class="panel glass left">
+      <p class="eyebrow">01 · Lights</p>
+      <h2>Every light.<br />Any colour.</h2>
+      <p>Rev bar, side lights, button caps, encoder rings: {w.leds.length} LEDs, each its own colour, 60 times a second. Shift lights follow each car's real data.</p>
+      <div class="chips" id="presets">
+        {PRESETS.map((p, i) => <button class="chip" data-preset={p.id} aria-pressed={i === 0 ? "true" : "false"}><span class="dot" style={`background:${p.rev[p.rev.length - 1]};color:${p.rev[p.rev.length - 1]}`}></span>{p.name}</button>)}
+      </div>
+      <div class="row">
+        <button class="btn primary" id="rev-btn">Hold to rev</button>
+        <span class="muted small">or hold <span class="kbd">Space</span></span>
+      </div>
+      <p class="muted small">Tip: click any light on the wheel to paint it. <a href="/lab/" class="red">Open the light lab →</a></p>
+    </div></div>
+  </section>
+
+  <!-- 3. dashes -->
+  <section class="chapter" id="dashes" data-shot="screen">
+    <div class="wrap"><div class="panel glass right">
+      <p class="eyebrow">02 · Dashes</p>
+      <h2>Dashes that are yours.</h2>
+      <p>Pick one per car, switch with the dash button, or design your own. What you see on the wheel here is the real dash file, rendered live from a simulated lap.</p>
+      <div class="chips" id="dash-chips"><span class="muted small">Loading the library…</span></div>
+      <p class="small muted" id="dash-meta"></p>
+      <div class="row"><a class="btn" href="/library/">All dashes</a><a class="btn small" href="/docs/dash-designer/">The designer</a></div>
+    </div></div>
+  </section>
+
+  <!-- 4. alerts -->
+  <section class="chapter" id="alerts" data-shot="controls">
+    <div class="wrap"><div class="panel glass left">
+      <p class="eyebrow">03 · Alerts</p>
+      <h2>See it before you think it.</h2>
+      <p>Flags on the side lights, the spotter at the edge of your eye, ABS and TC rings that flash while they work. Your order, your colours, plus custom alerts from any SimHub value.</p>
+      <div class="chips" id="flags">
+        <button class="chip" data-flag="yellow"><span class="dot" style="background:#ffd400;color:#ffd400"></span>Yellow</button>
+        <button class="chip" data-flag="blue"><span class="dot" style="background:#2f6bff;color:#2f6bff"></span>Blue</button>
+        <button class="chip" data-flag="green"><span class="dot" style="background:#21e07a;color:#21e07a"></span>Green</button>
+        <button class="chip" data-flag="chequered"><span class="dot" style="background:#fff;color:#fff"></span>Chequered</button>
+        <button class="chip" data-flag="black"><span class="dot" style="background:#fff;color:#fff"></span>Black</button>
+      </div>
+      <div class="chips">
+        <button class="chip" data-toggle="spotterLeft">Car left</button>
+        <button class="chip" data-toggle="spotterRight">Car right</button>
+        <button class="chip" data-toggle="pitLimiter">Pit limiter</button>
+        <button class="chip" id="bias-btn">Change brake bias</button>
+      </div>
+    </div></div>
+  </section>
+
+  <!-- 5. drive -->
+  <section class="chapter" id="drive" data-shot="drive">
+    <div class="wrap"><div class="panel glass right">
+      <p class="eyebrow">04 · Drive it</p>
+      <h2>Take it for a lap.</h2>
+      <p>You're driving now: the dash, the shift lights and the alerts all react. It's the same engine the plugin uses for its demo.</p>
+      <div class="keys">
+        <span><span class="kbd">W</span> / <span class="kbd">↑</span> throttle</span>
+        <span><span class="kbd">S</span> / <span class="kbd">↓</span> brake</span>
+        <span><span class="kbd">E</span> / <span class="kbd">Q</span> paddles</span>
+      </div>
+      <div class="pedals">
+        <button class="btn" id="brake-btn">Brake</button>
+        <button class="btn" id="down-btn">−</button>
+        <button class="btn" id="up-btn">+</button>
+        <button class="btn primary" id="gas-btn">Throttle</button>
+      </div>
+      <button class="chip" id="sound-btn" aria-pressed="false">♪ Engine sound</button>
+    </div></div>
+  </section>
+
+  <!-- 6. safety -->
+  <section class="chapter" id="safety" data-shot="back">
+    <div class="wrap"><div class="panel glass left">
+      <p class="eyebrow">05 · Built carefully</p>
+      <h2>Your base is never touched.</h2>
+      <p>Force feedback and base settings stay with SimPro. Unleashed mode changes only the wheel's own app, and every change is checked against the stock firmware in an emulator before it's tried on a real wheel. Going back to stock is SimPro's own reinstall.</p>
+      <div class="row"><a class="btn" href="/firmware/">How the firmware is built</a></div>
+    </div></div>
+  </section>
+
+  <div class="solid">
+    <!-- features -->
+    <section class="section">
+      <div class="wrap">
+        <p class="eyebrow reveal">Everything in the box</p>
+        <h2 class="reveal">One plugin. <span class="red">All of it.</span></h2>
+        <div class="grid four features">
+          {features.map((f, i) => (
+            <a class="card glow reveal" href={f.href} style={`transition-delay:${i * 50}ms`}>
+              <span class="ico" aria-hidden="true">{f.icon}</span>
+              <h3>{f.title}</h3>
+              <p>{f.text}</p>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- how it works -->
+    <section class="section how">
+      <div class="wrap">
+        <p class="eyebrow reveal">How it works</p>
+        <h2 class="reveal">SimHub in. <span class="red">Your wheel</span> out.</h2>
+        <div class="flow reveal" id="flow">
+          <svg viewBox="0 0 1000 300" role="img" aria-label="SimHub sends game data to the FX Unleashed plugin, which drives the wheel over its USB cable; SimPro keeps the base and force feedback.">
+            <defs>
+              <linearGradient id="wire" x1="0" x2="1"><stop offset="0" stop-color="#ff1f2d" stop-opacity="0.1" /><stop offset="0.5" stop-color="#ff1f2d" /><stop offset="1" stop-color="#ff1f2d" stop-opacity="0.1" /></linearGradient>
+            </defs>
+            <g class="wires" fill="none" stroke-width="2">
+              <path id="w1" d="M180 110 C 260 110, 300 110, 380 110" stroke="url(#wire)" />
+              <path id="w2" d="M620 110 C 700 110, 740 110, 820 110" stroke="url(#wire)" />
+              <path id="w3" d="M180 230 C 450 230, 560 230, 820 230" stroke="rgba(255,255,255,0.18)" stroke-dasharray="4 6" />
+            </g>
+            <g class="nodes" font-family="Chakra Petch" text-anchor="middle">
+              <g transform="translate(100,110)"><rect x="-80" y="-42" width="160" height="84" rx="16" /><text y="-4">SimHub</text><text y="18" class="sub">every game</text></g>
+              <g transform="translate(500,110)" class="hot"><rect x="-120" y="-50" width="240" height="100" rx="18" /><text y="-6">FX Unleashed</text><text y="18" class="sub">dashes · lights · library</text></g>
+              <g transform="translate(900,110)"><rect x="-80" y="-42" width="160" height="84" rx="16" /><text y="-4">{w.name}</text><text y="18" class="sub">over its USB cable</text></g>
+              <g transform="translate(100,230)"><rect x="-80" y="-30" width="160" height="60" rx="14" /><text y="6">SimPro</text></g>
+              <g transform="translate(900,230)"><rect x="-80" y="-30" width="160" height="60" rx="14" /><text y="6">Base · FFB</text></g>
+            </g>
+            <g class="pulses">
+              {[0, 1, 2, 3, 4, 5].map(i => <circle r="4" class="pulse"><animateMotion dur="1.8s" begin={`${i * 0.3}s`} repeatCount="indefinite"><mpath href={i % 2 ? "#w2" : "#w1"} /></animateMotion></circle>)}
+            </g>
+          </svg>
+        </div>
+        <div class="grid three steps">
+          <div class="card reveal"><b>1</b><h3>Install the plugin</h3><p>Drop one file into SimHub. It updates itself after that.</p></div>
+          <div class="card reveal"><b>2</b><h3>Flash the wheel app</h3><p>Once, through SimPro's own firmware page. Back to stock any time.</p></div>
+          <div class="card reveal"><b>3</b><h3>Plug in and drive</h3><p>The USB cable goes to the PC. Start a game: your dash and lights take over.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- library teaser -->
+    <section class="section">
+      <div class="wrap">
+        <p class="eyebrow reveal">Library</p>
+        <h2 class="reveal">Made by drivers. <span class="red">Shared with you.</span></h2>
+        <p class="lead reveal">Dashes and screensavers from the community, checked for size, format and scripts before they're listed. Install from here or from the plugin.</p>
+        <div class="lib-row" id="lib-row"></div>
+        <a class="btn reveal" href="/library/">Open the library →</a>
+      </div>
+    </section>
+
+    <!-- wheels -->
+    <section class="section">
+      <div class="wrap">
+        <p class="eyebrow reveal">Wheels</p>
+        <h2 class="reveal">Built for the {w.name}. <span class="red">Ready for more.</span></h2>
+        <div class="grid three">
+          {wheels.map(x => (
+            <a class="card glow reveal wheel-card" href={`/wheels/${x.id}/`}>
+              <span class={`badge ${x.status}`}>{x.status}</span>
+              <h3>{x.maker} {x.name}</h3>
+              <p>{x.tagline}</p>
+            </a>
+          ))}
+          <div class="card reveal wheel-card ghost"><span class="badge planned">next</span><h3>Your wheel?</h3><p>Other wheels can be added: the site, the lights and the 3D model are built from one wheel description.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- final cta -->
+    <section class="section final">
+      <div class="wrap center">
+        <img src="/brand/mark-512.png" alt="" width="180" height="180" class="reveal badge-logo" />
+        <h2 class="reveal">Ready to <span class="red">unleash</span> it?</h2>
+        <p class="lead reveal">Free, open source, and yours to change.</p>
+        <div class="ctas reveal"><a class="btn primary" href="/start/">Get started</a><a class="btn" href={site.github}>GitHub</a></div>
+      </div>
+    </section>
+  </div>
+</Base>
+
+<style>
+  .stage { position: fixed; inset: 0; z-index: 0; transition: opacity 0.4s; }
+  .stage :global(canvas) { width: 100% !important; height: 100% !important; }
+  .stage-fallback { position: absolute; top: 50%; left: 50%; width: 320px; transform: translate(-50%, -50%); opacity: 0.25; }
+  .stage.live .stage-fallback { display: none; }
+  .hud { position: fixed; z-index: 2; left: 50%; bottom: 36px; transform: translateX(-50%); display: flex; gap: 36px; align-items: end; opacity: 0; transition: opacity 0.5s; pointer-events: none; font-family: var(--display); }
+  .hud.on { opacity: 1; }
+  .hud div { text-align: center; }
+  .hud b { display: block; font-size: 44px; line-height: 1; font-variant-numeric: tabular-nums; }
+  .hud .gear b { font-size: 84px; color: var(--red); text-shadow: 0 0 30px var(--red-glow); }
+  .hud span { font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--text-3); }
+
+  .chapter { position: relative; z-index: 1; min-height: 100vh; display: flex; align-items: center; padding: 110px 0 60px; pointer-events: none; }
+  .chapter .panel, .chapter .ctas, .chapter a, .chapter button { pointer-events: auto; }
+  .panel { max-width: 460px; padding: 34px; }
+  .panel.right { margin-left: auto; }
+  .panel h2 { font-size: clamp(34px, 4vw, 54px); }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0; }
+  .row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin: 16px 0; }
+  .small { font-size: 13px; }
+  .keys { display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px; color: var(--text-2); margin: 16px 0; }
+  .pedals { display: grid; grid-template-columns: 1fr auto auto 1fr; gap: 8px; margin: 16px 0; }
+  .pedals .btn { justify-content: center; touch-action: none; }
+
+  .hero { align-items: flex-end; padding-bottom: 12vh; }
+  .hero .lead { max-width: 560px; }
+  .hero .wrap { pointer-events: none; }
+  .title { display: flex; flex-direction: column; font-size: clamp(52px, 8.6vw, 128px); line-height: 0.88; margin-bottom: 20px; text-shadow: 0 10px 60px rgba(0, 0, 0, 0.6); }
+  .title span { display: block; opacity: 0; transform: translateY(40px); animation: rise 1.2s var(--ease) forwards; }
+  .title span:nth-child(2) { animation-delay: 0.25s; text-shadow: 0 0 60px var(--red-glow); }
+  .hero .lead { opacity: 0; animation: rise 1.2s 0.5s var(--ease) forwards; text-shadow: 0 2px 20px #000; }
+  .ctas { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 26px; }
+  .hero .ctas { opacity: 0; animation: rise 1.2s 0.7s var(--ease) forwards; }
+  .stats { display: flex; gap: clamp(20px, 4vw, 56px); margin: 44px 0 0; flex-wrap: wrap; opacity: 0; animation: rise 1.2s 0.9s var(--ease) forwards; }
+  .stats dt { font: 700 clamp(26px, 3vw, 38px)/1 var(--display); }
+  .stats dd { margin: 4px 0 0; font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-3); }
+  @keyframes rise { to { opacity: 1; transform: none; } }
+  .scroll-hint { position: absolute; bottom: 26px; left: 50%; width: 26px; height: 42px; border: 2px solid rgba(255,255,255,0.3); border-radius: 14px; transform: translateX(-50%); }
+  .scroll-hint span { position: absolute; left: 50%; top: 8px; width: 4px; height: 8px; margin-left: -2px; border-radius: 2px; background: var(--red); animation: wheel 1.8s infinite; }
+  @keyframes wheel { 0% { transform: translateY(0); opacity: 1 } 80% { transform: translateY(14px); opacity: 0 } 100% { opacity: 0 } }
+
+  .solid { position: relative; z-index: 1; background: linear-gradient(180deg, rgba(5,6,8,0) 0, var(--bg) 220px); }
+  .features .card { display: block; min-height: 220px; }
+  .ico { display: inline-grid; place-items: center; width: 46px; height: 46px; border-radius: 12px; background: rgba(255, 31, 45, 0.1); color: var(--red); font-size: 22px; margin-bottom: 18px; box-shadow: inset 0 0 0 1px rgba(255,31,45,0.25); }
+  .flow { margin: 40px 0; }
+  .flow svg { width: 100%; height: auto; overflow: visible; }
+  .flow rect { fill: #0f1115; stroke: rgba(255,255,255,0.14); }
+  .flow .hot rect { stroke: var(--red); filter: drop-shadow(0 0 18px rgba(255,31,45,0.5)); }
+  .flow text { fill: #fff; font-size: 20px; font-weight: 600; letter-spacing: 0.05em; }
+  .flow text.sub { fill: var(--text-3); font-size: 13px; font-weight: 500; }
+  .pulse { fill: #ff4d58; filter: drop-shadow(0 0 6px #ff1f2d); }
+  .steps b { font: 700 40px/1 var(--display); color: var(--red); display: block; margin-bottom: 10px; }
+  .lib-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; margin: 30px 0; }
+  .lib-card { border-radius: 16px; overflow: hidden; border: 1px solid var(--line); background: #0c0d10; transition: transform 0.4s var(--ease), box-shadow 0.4s; }
+  .lib-card:hover { transform: translateY(-6px) rotateX(3deg); box-shadow: 0 30px 60px -20px rgba(255,31,45,0.35); }
+  .lib-card img { aspect-ratio: 5 / 3; width: 100%; object-fit: cover; }
+  .lib-card div { padding: 14px 16px; }
+  .lib-card b { font-family: var(--display); font-size: 18px; }
+  .wheel-card { min-height: 170px; }
+  .wheel-card.ghost { border-style: dashed; background: transparent; }
+  .badge { display: inline-block; font: 700 10px/1 var(--display); letter-spacing: 0.2em; text-transform: uppercase; padding: 6px 9px; border-radius: 6px; margin-bottom: 14px; background: rgba(33,224,122,0.12); color: var(--green); }
+  .badge.planned { background: rgba(255,255,255,0.06); color: var(--text-3); }
+  .badge.beta { background: rgba(255,176,0,0.12); color: var(--amber); }
+  .final .center { text-align: center; display: flex; flex-direction: column; align-items: center; }
+  .badge-logo { filter: drop-shadow(0 0 50px rgba(255,31,45,0.45)); animation: float 6s ease-in-out infinite; }
+  @keyframes float { 50% { transform: translateY(-10px) rotate(-2deg); } }
+
+  @media (max-width: 800px) {
+    .chapter { align-items: flex-end; min-height: 110vh; }
+    .panel { max-width: none; padding: 24px; }
+    .hud { bottom: 16px; gap: 20px; }
+    .hud b { font-size: 30px; } .hud .gear b { font-size: 56px; }
+  }
+</style>
+
+<script src="../scripts/home.ts"></script>

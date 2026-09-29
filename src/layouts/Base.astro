@@ -1,0 +1,51 @@
+---
+// Every page: head, fonts, the navigation, the footer with the disclaimer, the pointer glow and reveal-on-scroll.
+import "../styles/global.css";
+import Nav from "../components/Nav.astro";
+import Footer from "../components/Footer.astro";
+import { site } from "../config";
+
+interface Props { title?: string; description?: string; bare?: boolean; image?: string }
+const { title, description = site.description, bare = false, image = "/brand/lockup.png" } = Astro.props;
+const full = title ? `${title} · ${site.name}` : `${site.name}: ${site.tagline}`;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+---
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{full}</title>
+  <meta name="description" content={description} />
+  <link rel="canonical" href={canonical} />
+  <link rel="icon" type="image/png" href="/brand/icon-256.png" />
+  <meta name="theme-color" content="#050608" />
+  <meta property="og:title" content={full} />
+  <meta property="og:description" content={description} />
+  <meta property="og:image" content={new URL(image, Astro.site)} />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet" />
+  <slot name="head" />
+</head>
+<body>
+  <div class="pointer-glow" aria-hidden="true"></div>
+  {!bare && <Nav />}
+  <main id="main"><slot /></main>
+  {!bare && <Footer />}
+  <script>
+    // reveal on scroll
+    const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }), { rootMargin: "0px 0px -10% 0px" });
+    document.querySelectorAll(".reveal").forEach(el => io.observe(el));
+    // the pointer's glow, and the glowing edge of cards under the pointer
+    const root = document.documentElement;
+    addEventListener("pointermove", e => {
+      root.style.setProperty("--px", e.clientX + "px"); root.style.setProperty("--py", e.clientY + "px");
+      const card = (e.target as Element)?.closest?.(".card.glow") as HTMLElement | null;
+      if (card) { const r = card.getBoundingClientRect(); card.style.setProperty("--mx", e.clientX - r.left + "px"); card.style.setProperty("--my", e.clientY - r.top + "px"); }
+    }, { passive: true });
+  </script>
+</body>
+</html>

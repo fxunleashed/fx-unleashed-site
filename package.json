@@ -1,0 +1,17 @@
+{
+  "name": "fx-unleashed-site",
+  "private": true,
+  "type": "module",
+  "version": "0.1.0",
+  "scripts": {
+    "sync": "node scripts/sync.mjs",
+    "dev": "npm run sync && astro dev",
+    "build": "npm run sync && astro build",
+    "preview": "astro preview"
+  },
+  "dependencies": {
+    "astro": "^7.3.5",
+    "marked": "^18.0.14",
+    "three": "^0.186.1"
+  }
+}

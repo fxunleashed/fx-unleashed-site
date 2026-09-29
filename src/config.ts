@@ -1,0 +1,35 @@
+// Everything a maintainer is likely to change, in one place.
+
+export const site = {
+  name: "FX Unleashed",
+  domain: "fxunleashed.com",
+  tagline: "Custom dashes and lights for Simagic wheels",
+  description:
+    "A free SimHub plugin that unleashes your Simagic FX Pro: your own dashes, every LED in any colour, screensavers, " +
+    "a community library, and the dash button, all driven from SimHub.",
+  // GitHub (the org and repos are created before launch, see NEXT.md N in the plugin repo)
+  github: "https://github.com/fxunleashed",
+  pluginRepo: "fxunleashed/fx-unleashed",
+  libraryRepo: "fxunleashed/fx-unleashed-library",
+  // Where the plugin and the library live at runtime
+  libraryBase: "https://raw.githubusercontent.com/fxunleashed/fx-unleashed-library/main/",
+  pluginPort: 8899, // the plugin's local server (designer, library install, screen mirror)
+  releasesApi: "https://api.github.com/repos/fxunleashed/fx-unleashed/releases",
+  contact: "https://github.com/fxunleashed/fx-unleashed/issues",
+};
+
+export const nav = [
+  { href: "/", label: "Home" },
+  { href: "/start/", label: "Get started" },
+  { href: "/library/", label: "Library" },
+  { href: "/lab/", label: "Light lab" },
+  { href: "/docs/", label: "Docs" },
+  { href: "/firmware/", label: "Firmware" },
+  { href: "/changelog/", label: "Changelog" },
+  { href: "/faq/", label: "FAQ" },
+];
+
+export const disclaimer =
+  "FX Unleashed is an independent community project. It is not affiliated with, endorsed by or supported by Simagic. " +
+  "Simagic and FX Pro are trademarks of their owner, used only to say which hardware this works with. The software is " +
+  "provided \"as is\", without warranty of any kind. Use it at your own risk.";
