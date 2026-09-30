@@ -359,18 +359,9 @@ export function buildWheel(w: Wheel, opts: { quality?: "high" | "low" } = {}): W
   qrRing.position.set(0, 0.05, -front - 0.355);
   group.add(qrRing);
 
-  // ----- build-in and LEDs -----
-  const parts = group.children.filter(c => c !== body && !grips.includes(c as THREE.Mesh));
-  function setBuild(t: number) {
-    const e = 1 - Math.pow(1 - Math.max(0, Math.min(1, t)), 3);
-    body.scale.z = Math.max(0.001, e);
-    for (const g of grips) g.scale.z = Math.max(0.001, e);
-    rimMat.color.setRGB(0.5 * e, 0.035 * e, 0.05 * e);
-    for (const [i, p] of parts.entries()) {
-      const at = Math.max(0, Math.min(1, (t - 0.35 - (i / parts.length) * 0.4) / 0.25));
-      p.visible = at > 0;
-    }
-  }
+  // ----- LEDs -----
+  // The wheel is whole from the first frame: no part is animated in (the user's choice). Kept for the stage's API.
+  function setBuild(_t: number) {}
   function setLeds(frame: Led[]) {
     for (const led of w.leds) {
       const f = frame[led.i], m = ledMats[led.i];
