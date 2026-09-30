@@ -275,6 +275,7 @@ export function buildWheel(w: Wheel, opts: { quality?: "high" | "low" } = {}): W
     return keep(new THREE.CanvasTexture(cv));
   })();
   const glows: THREE.MeshBasicMaterial[] = [];
+  const hitMat = keep(new THREE.MeshBasicMaterial({ visible: false })); // never drawn; still hit by the raycaster
   for (const led of w.leds) {
     const mat = keep(new THREE.MeshBasicMaterial({ color: 0x000000, toneMapped: false }));
     let mesh: THREE.Mesh;
@@ -337,8 +338,15 @@ export function buildWheel(w: Wheel, opts: { quality?: "high" | "low" } = {}): W
       mesh.position.copy(toLocal(led.x, led.y, front + 0.072));
       group.add(mesh);
     }
-    mesh.userData.index = led.i;
-    ledMeshes[led.i] = mesh;
+    // Click target: an invisible disc the size of the whole control (bezel, encoder plate), level with its top, so a
+    // click anywhere on it picks the LED (the lights themselves are thin rings and lines).
+    const hitR = (led.group === "buttons" ? led.r * 1.2 : led.group === "encoders" ? 27 : led.r * 1.8) * k;
+    const hitZ = led.group === "buttons" ? 0.05 : led.group === "encoders" ? 0.106 : 0.09;
+    const hit = new THREE.Mesh(keep(new THREE.CircleGeometry(hitR, 24)), hitMat);
+    hit.position.copy(toLocal(led.x, led.y, front + hitZ));
+    hit.userData.index = led.i;
+    group.add(hit);
+    ledMeshes[led.i] = hit;
     ledMats[led.i] = mat;
     // The glow lies flat on the surface the light sits on (light spilling onto it), just above it and under the
     // bezel or knob, so those hide the right part of it from every angle. (Camera-facing sprites cut through the
