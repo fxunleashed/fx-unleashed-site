@@ -81,6 +81,15 @@ export class Car {
       waterTemp: 84, oilTemp: 98, absActive: false, tcActive: false, pitLimiter: false, shift: false, limiter: false,
       flag: "", spotterLeft: false, spotterRight: false, clock: "", date: "", sessionTypeName: "RACE",
     };
+    // The page opens mid-lap, already at speed in a fitting gear: not on a standing start, whose launch set off the
+    // traction control flash on every load.
+    const s = this.s;
+    s.speed = target(this.pos);
+    while (s.gear < RATIOS.length - 1 && IDLE + s.speed * RATIOS[s.gear] * 18.5 > SHIFT_RPM - 400) s.gear++;
+    s.gearText = String(s.gear);
+    s.rpm = IDLE + s.speed * RATIOS[s.gear] * 18.5;
+    s.rpmPercent = (s.rpm / MAX_RPM) * 100;
+    s.throttle = 100;
   }
 
   /** When brake bias last changed (the pop-up in dashes like Stint). */
