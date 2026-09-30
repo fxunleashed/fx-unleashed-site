@@ -17,7 +17,7 @@ export interface Shot { cam: [number, number, number]; look: [number, number, nu
 
 // Camera positions around the wheel (world units: 1 = 10 cm; the wheel is ~3 wide, facing +z)
 export const SHOTS: Record<string, Shot> = {
-  hero: { cam: [-1.55, 0.05, 5.9], look: [-1.6, -0.05, 0], rot: [0.06, -0.38, 0.02] },
+  hero: { cam: [-1.8, 0.05, 5.9], look: [-1.85, -0.05, 0], rot: [0.06, -0.38, 0.02] },
   heroNarrow: { cam: [0, -1.0, 7.4], look: [0, -1.05, 0], rot: [0.1, -0.2, 0] },
   front: { cam: [0, 0, 5.2], look: [0, 0, 0], rot: [0, 0, 0] },
   rev: { cam: [-0.55, 1.1, 2.9], look: [-0.62, 0.6, 0], rot: [0.28, 0.08, 0] },       // panel on the left: the bar sits right of it
@@ -32,7 +32,7 @@ export const SHOTS: Record<string, Shot> = {
 };
 
 const FilmShader = {
-  uniforms: { tDiffuse: { value: null }, time: { value: 0 }, vignette: { value: 1.1 }, grain: { value: 0.045 }, aberration: { value: 0.0016 } },
+  uniforms: { tDiffuse: { value: null }, time: { value: 0 }, vignette: { value: 1.0 }, grain: { value: 0.012 }, aberration: { value: 0 } },
   vertexShader: "varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }",
   fragmentShader: `
     uniform sampler2D tDiffuse; uniform float time; uniform float vignette; uniform float grain; uniform float aberration;
@@ -103,8 +103,9 @@ export class Stage {
     const low = opts.quality === "low" || matchMedia("(max-width: 700px)").matches;
     this.renderer = new THREE.WebGLRenderer({ antialias: !low, alpha: !!opts.transparent, powerPreference: "high-performance" });
     this.renderer.setPixelRatio(Math.min(devicePixelRatio, low ? 1.25 : 2));
-    this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.05;
+    // AgX rolls highlights off smoothly (ACES clipped bright LEDs and reflections to flat white)
+    this.renderer.toneMapping = THREE.AgXToneMapping;
+    this.renderer.toneMappingExposure = 1.15;
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     host.appendChild(this.renderer.domElement);
     this.renderer.domElement.classList.add("stage-canvas");
@@ -112,14 +113,14 @@ export class Stage {
     this.camera = new THREE.PerspectiveCamera(32, 1, 0.1, 80);
     const pmrem = new THREE.PMREMGenerator(this.renderer);
     this.scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
-    this.scene.environmentIntensity = 0.55; // the room's lights, reflected in the clear coat, stay under the bloom threshold
+    this.scene.environmentIntensity = 0.4; // the room's lights, reflected in the clear coat, stay well under the bloom threshold
     if (!opts.transparent) this.scene.background = new THREE.Color(0x050608);
     this.scene.fog = new THREE.Fog(0x050608, 9, 22);
 
     // lights: a soft key from above-front, a red rim from behind, a cool fill
-    const key = new THREE.DirectionalLight(0xffffff, 0.95); key.position.set(2, 4, 5); this.scene.add(key);
-    const rimL = new THREE.PointLight(0xff1f2d, 30, 12, 2); rimL.position.set(-2.5, 1.5, -2.5); this.scene.add(rimL);
-    const fill = new THREE.DirectionalLight(0x6a8cff, 0.35); fill.position.set(-4, -2, 3); this.scene.add(fill);
+    const key = new THREE.DirectionalLight(0xffffff, 1.1); key.position.set(2, 4, 5); this.scene.add(key);
+    const rimL = new THREE.PointLight(0xff1f2d, 10, 12, 2); rimL.position.set(-2.5, 1.5, -2.5); this.scene.add(rimL);
+    const fill = new THREE.DirectionalLight(0x8aa4ff, 0.45); fill.position.set(-4, -2, 3); this.scene.add(fill);
 
     // a red aura behind the wheel
     const auraTex = this.radial("rgba(255,31,45,0.55)", "rgba(255,31,45,0)");
@@ -137,9 +138,10 @@ export class Stage {
     this.makeStreaks();
 
     // post: bloom for the LEDs and screen, then tone mapping, then a film finish
-    this.composer = new EffectComposer(this.renderer);
+    const target = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, samples: low ? 0 : 4 });
+    this.composer = new EffectComposer(this.renderer, target);
     this.composer.addPass(new RenderPass(this.scene, this.camera));
-    this.bloom = new UnrealBloomPass(new THREE.Vector2(512, 512), low ? 0.85 : 1.05, 0.5, 1.0); // threshold 1: only HDR emitters glow
+    this.bloom = new UnrealBloomPass(new THREE.Vector2(512, 512), low ? 0.45 : 0.55, 0.32, 1.0); // threshold 1: only HDR emitters glow
     this.composer.addPass(this.bloom);
     this.composer.addPass(new OutputPass());
     this.film = new ShaderPass(FilmShader);
@@ -184,7 +186,7 @@ export class Stage {
     const g = new THREE.BufferGeometry();
     g.setAttribute("position", new THREE.BufferAttribute(pos, 3));
     g.setAttribute("color", new THREE.BufferAttribute(col, 3));
-    const m = new THREE.PointsMaterial({ size: 0.035, map: this.radial("rgba(255,255,255,1)", "rgba(255,255,255,0)"), vertexColors: true, transparent: true, opacity: 0.55, depthWrite: false, blending: THREE.AdditiveBlending });
+    const m = new THREE.PointsMaterial({ size: 0.035, map: this.radial("rgba(255,255,255,1)", "rgba(255,255,255,0)"), vertexColors: true, transparent: true, opacity: 0.35, depthWrite: false, blending: THREE.AdditiveBlending });
     this.particles = new THREE.Points(g, m);
     this.scene.add(this.particles);
   }
@@ -315,13 +317,13 @@ export class Stage {
     p.rotation.z += (rz - (this.car.mode === "manual" ? 0 : 0) - p.rotation.z) * k;
     p.position.y = Math.sin(t * 0.8) * 0.025;
 
-    if (this.particles) { this.particles.rotation.y = t * 0.01; (this.particles.material as THREE.PointsMaterial).opacity = 0.45 + 0.1 * Math.sin(t); }
+    if (this.particles) { this.particles.rotation.y = t * 0.01; (this.particles.material as THREE.PointsMaterial).opacity = 0.35; }
     if (this.streaks) {
       const m = this.streaks.material as THREE.LineBasicMaterial;
       m.opacity += (this.speedLines * Math.min(1, this.car.s.speed / 200) * 0.7 - m.opacity) * k;
       this.streaks.position.z = (t * 18 * (0.3 + this.car.s.speed / 150)) % 20;
     }
-    (this.aura.material as THREE.MeshBasicMaterial).opacity = 0.35 + (this.car.s.shift ? 0.35 : 0) + 0.05 * Math.sin(t * 1.3);
+    (this.aura.material as THREE.MeshBasicMaterial).opacity = 0.3;
     (this.film.uniforms as any).time.value = t;
     this.onFrame?.(t, dt);
     if (render) this.composer.render(dt);

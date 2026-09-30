@@ -32,7 +32,7 @@ function carbonTextures() {
     const horiz = ((x + y) >> 1) % 2 === 0;
     const px = x * cell / 2, py = y * cell / 2, s = cell / 2;
     const g = c.createLinearGradient(px, py, horiz ? px : px + s, horiz ? py + s : py);
-    g.addColorStop(0, "#0b0c0e"); g.addColorStop(0.5, horiz ? "#2a2d33" : "#1a1c20"); g.addColorStop(1, "#0b0c0e");
+    g.addColorStop(0, "#0c0d0f"); g.addColorStop(0.5, horiz ? "#1f2126" : "#16181b"); g.addColorStop(1, "#0c0d0f");
     c.fillStyle = g; c.fillRect(px, py, s, s);
     // normal map: tows bulge across their width
     const gn = m.createLinearGradient(px, py, horiz ? px : px + s, horiz ? py + s : py);
@@ -114,10 +114,10 @@ export function buildWheel(w: Wheel, opts: { quality?: "high" | "low" } = {}): W
   }));
   bodyGeo.translate(0, 0, -depth / 2);
   const carbon = carbonTextures();
-  for (const t of Object.values(carbon)) { t.repeat.set(1.3, 1.3); keep(t); }
+  for (const t of Object.values(carbon)) { t.repeat.set(4, 4); t.anisotropy = 16; keep(t); }
   const bodyMat = keep(new THREE.MeshPhysicalMaterial({
-    ...carbon, color: 0xffffff, metalness: 0.25, roughness: 0.42, clearcoat: 1, clearcoatRoughness: 0.16,
-    normalScale: new THREE.Vector2(0.35, 0.35), envMapIntensity: 1.1,
+    ...carbon, color: 0xffffff, metalness: 0.05, roughness: 0.62, clearcoat: 0.3, clearcoatRoughness: 0.45,
+    normalScale: new THREE.Vector2(0.12, 0.12), envMapIntensity: 0.35, // matte-ish: no sheet of reflected light across the face as it turns
   }));
   const body = new THREE.Mesh(bodyGeo, bodyMat);
   body.castShadow = body.receiveShadow = true;
@@ -133,8 +133,8 @@ export function buildWheel(w: Wheel, opts: { quality?: "high" | "low" } = {}): W
     const tx = bx - ax, ty = by - ay, l = Math.hypot(tx, ty) || 1;
     return toLocal(x - inward * (ty / l) * 4, y + inward * (tx / l) * 4, front + 0.004);
   }), true, "centripetal");
-  const rimMat = keep(new THREE.MeshBasicMaterial({ color: new THREE.Color(2.2, 0.12, 0.18), toneMapped: false }));
-  const rim = new THREE.Mesh(keep(new THREE.TubeGeometry(rimCurve, 400, 0.006, 8, true)), rimMat);
+  const rimMat = keep(new THREE.MeshBasicMaterial({ color: new THREE.Color(0.5, 0.035, 0.05), toneMapped: false }));
+  const rim = new THREE.Mesh(keep(new THREE.TubeGeometry(rimCurve, 600, 0.008, 8, true)), rimMat);
   group.add(rim);
 
   // ----- bezel and screen -----
@@ -147,12 +147,12 @@ export function buildWheel(w: Wheel, opts: { quality?: "high" | "low" } = {}): W
   const screenTexture = keep(new THREE.CanvasTexture(screenCanvas));
   screenTexture.colorSpace = THREE.SRGBColorSpace;
   screenTexture.anisotropy = 8;
-  const screenMat = keep(new THREE.MeshBasicMaterial({ map: screenTexture, toneMapped: false, color: new THREE.Color(1.12, 1.12, 1.12) })); // a touch over 1: bright text glows a little
+  const screenMat = keep(new THREE.MeshBasicMaterial({ map: screenTexture, toneMapped: false, color: new THREE.Color(0.95, 0.95, 0.95) })); // under the bloom threshold: text stays crisp
   const screen = new THREE.Mesh(keep(new THREE.PlaneGeometry(s.w * k, s.h * k)), screenMat);
   screen.position.copy(toLocal(s.x + s.w / 2, s.y + s.h / 2, front + 0.0712));
   group.add(screen);
   // glass over the screen: catches reflections
-  const glassMat = keep(new THREE.MeshPhysicalMaterial({ color: 0x000000, roughness: 0.02, metalness: 0, clearcoat: 1, transparent: true, opacity: 0.18, envMapIntensity: 2.4 }));
+  const glassMat = keep(new THREE.MeshPhysicalMaterial({ color: 0x000000, roughness: 0.02, metalness: 0, clearcoat: 1, transparent: true, opacity: 0.12, envMapIntensity: 1.2 }));
   const glass = new THREE.Mesh(keep(new THREE.PlaneGeometry(b.w * k * 0.97, b.h * k * 0.95)), glassMat);
   glass.position.copy(toLocal(b.x + b.w / 2, b.y + b.h / 2, front + 0.0725));
   group.add(glass);
@@ -174,11 +174,11 @@ export function buildWheel(w: Wheel, opts: { quality?: "high" | "low" } = {}): W
   //   middle where the real caps have their icon (their icons aren't copied);
   // - an encoder: a black plate (a circle with a label tab, BB a keyhole) edged with a thin line of light, the tab lit
   //   with its label, and a black knob on a dark knurled ring.
-  const btnBezel = keep(new THREE.MeshStandardMaterial({ color: 0x121317, metalness: 0.6, roughness: 0.3 }));
-  const capGlass = keep(new THREE.MeshPhysicalMaterial({ color: 0x07080a, metalness: 0, roughness: 0.08, clearcoat: 1, clearcoatRoughness: 0.05 }));
-  const knurlMat = keep(new THREE.MeshStandardMaterial({ color: 0x2b2d32, metalness: 1, roughness: 0.22 }));
-  const knobTop = keep(new THREE.MeshPhysicalMaterial({ color: 0x0a0b0d, metalness: 0.2, roughness: 0.25, clearcoat: 1, clearcoatRoughness: 0.1 }));
-  const plateMat = keep(new THREE.MeshPhysicalMaterial({ color: 0x0b0c0f, metalness: 0.5, roughness: 0.35, clearcoat: 0.6 }));
+  const btnBezel = keep(new THREE.MeshStandardMaterial({ color: 0x121317, metalness: 0.5, roughness: 0.45 }));
+  const capGlass = keep(new THREE.MeshPhysicalMaterial({ color: 0x07080a, metalness: 0, roughness: 0.3, clearcoat: 0.6, clearcoatRoughness: 0.25 }));
+  const knurlMat = keep(new THREE.MeshStandardMaterial({ color: 0x3a3d43, metalness: 0.85, roughness: 0.4 }));
+  const knobTop = keep(new THREE.MeshPhysicalMaterial({ color: 0x0a0b0d, metalness: 0.2, roughness: 0.38, clearcoat: 0.5, clearcoatRoughness: 0.3 }));
+  const plateMat = keep(new THREE.MeshPhysicalMaterial({ color: 0x0b0c0f, metalness: 0.4, roughness: 0.45, clearcoat: 0.3, clearcoatRoughness: 0.3 }));
   const upright = <T extends THREE.BufferGeometry>(g: T) => { g.rotateX(Math.PI / 2); return g; }; // axis Y -> out of the face
   /** Lathe profile [radius, height] in world units (listed from the top down), stood up on the face. */
   const lathe = (pts: [number, number][], seg = 64) =>
@@ -333,7 +333,7 @@ export function buildWheel(w: Wheel, opts: { quality?: "high" | "low" } = {}): W
   function setBuild(t: number) {
     const e = 1 - Math.pow(1 - Math.max(0, Math.min(1, t)), 3);
     body.scale.z = Math.max(0.001, e);
-    rimMat.color.setRGB(2.2 * e, 0.12 * e, 0.18 * e);
+    rimMat.color.setRGB(0.5 * e, 0.035 * e, 0.05 * e);
     for (const [i, p] of parts.entries()) {
       const at = Math.max(0, Math.min(1, (t - 0.35 - (i / parts.length) * 0.4) / 0.25));
       p.visible = at > 0;
@@ -344,7 +344,7 @@ export function buildWheel(w: Wheel, opts: { quality?: "high" | "low" } = {}): W
     for (const led of w.leds) {
       const f = frame[led.i], m = ledMats[led.i];
       if (!f || !m) continue;
-      const boost = led.group === "buttons" ? 1.8 : led.group === "encoders" ? 1.15 : 2.5;
+      const boost = led.group === "buttons" ? 1.4 : led.group === "encoders" ? 1.05 : 1.6;
       const off = 0.012;
       const a = f.a;
       // HDR colour when lit (the bloom pass makes the glow)

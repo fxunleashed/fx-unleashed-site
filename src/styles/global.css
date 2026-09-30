@@ -2,7 +2,7 @@
 :root {
   --bg: #050608;
   --bg-2: #0a0b0e;
-  --panel: rgba(18, 20, 24, 0.72);
+  --panel: rgba(12, 13, 16, 0.9);
   --panel-solid: #111317;
   --line: rgba(255, 255, 255, 0.08);
   --line-2: rgba(255, 255, 255, 0.14);
@@ -81,8 +81,9 @@ p { margin: 0 0 1em; color: var(--text-2); }
 
 /* panels */
 .glass {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.015)); border: 1px solid var(--line);
-  border-radius: var(--radius-lg); backdrop-filter: blur(18px) saturate(1.2); -webkit-backdrop-filter: blur(18px) saturate(1.2);
+  /* dark and nearly opaque: the 3D wheel moves behind these, and text must stay readable over any part of it */
+  background: linear-gradient(180deg, rgba(20, 22, 26, 0.9), rgba(10, 11, 14, 0.92)); border: 1px solid var(--line-2);
+  border-radius: var(--radius-lg); backdrop-filter: blur(24px) saturate(1.1); -webkit-backdrop-filter: blur(24px) saturate(1.1);
   box-shadow: 0 30px 80px -30px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 .card { padding: 26px; border-radius: var(--radius-lg); background: var(--panel-solid); border: 1px solid var(--line); position: relative; overflow: hidden; }
