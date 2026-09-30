@@ -274,7 +274,7 @@ export function buildWheel(w: Wheel, opts: { quality?: "high" | "low" } = {}): W
     c.fillStyle = g; c.fillRect(0, 0, 128, 128);
     return keep(new THREE.CanvasTexture(cv));
   })();
-  const glows: THREE.SpriteMaterial[] = [];
+  const glows: THREE.MeshBasicMaterial[] = [];
   for (const led of w.leds) {
     const mat = keep(new THREE.MeshBasicMaterial({ color: 0x000000, toneMapped: false }));
     let mesh: THREE.Mesh;
@@ -340,13 +340,17 @@ export function buildWheel(w: Wheel, opts: { quality?: "high" | "low" } = {}): W
     mesh.userData.index = led.i;
     ledMeshes[led.i] = mesh;
     ledMats[led.i] = mat;
-    const gm = keep(new THREE.SpriteMaterial({ map: halo, color: 0x000000, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false }));
-    const sprite = new THREE.Sprite(gm);
-    const size = (led.group === "encoders" ? 54 : led.group === "buttons" ? 38 : 22) * k;
-    sprite.scale.set(size, size, 1);
-    sprite.position.copy(toLocal(led.x, led.y, front + (led.group === "encoders" || led.group === "buttons" ? 0.03 : 0.08)));
-    sprite.raycast = () => {}; // never picked instead of the LED
-    group.add(sprite);
+    // The glow lies flat on the surface the light sits on (light spilling onto it), just above it and under the
+    // bezel or knob, so those hide the right part of it from every angle. (Camera-facing sprites cut through the
+    // raised bezels and knobs at an angle and lost half their glow.)
+    const gm = keep(new THREE.MeshBasicMaterial({ map: halo, color: 0x000000, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false }));
+    const size = (led.group === "encoders" ? 58 : led.group === "buttons" ? 44 : led.group === "rev" ? 22 : 24) * k;
+    const glow = new THREE.Mesh(keep(new THREE.PlaneGeometry(size, size)), gm);
+    // carbon face (buttons), encoder plate top (0.0175), bezel top (side lights, 0.07), smoked rev strip top (0.084)
+    const surface = led.group === "buttons" ? 0.002 : led.group === "encoders" ? 0.019 : led.group === "rev" ? 0.0855 : 0.0715;
+    glow.position.copy(toLocal(led.x, led.y, front + surface));
+    glow.raycast = () => {}; // never picked instead of the LED
+    group.add(glow);
     glows[led.i] = gm;
   }
 
