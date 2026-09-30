@@ -153,7 +153,7 @@ export class Stage {
     this.cur.look.fromArray(this.shot.look);
     this.cur.rot.set(...(this.shot.rot));
     this.model.setBuild(opts.intro ? 0 : 1);
-    this.lights.ignite = opts.intro ? 0 : 1;
+    this.lights.ignite = 1; // lit and animating from the first frame, also while the camera flies in
     this.buildStart = opts.intro ? 0.25 : -10;
     this.screenAt = opts.intro ? 0 : -10;
     if (!opts.intro) this.screenMode = "dash";
@@ -249,7 +249,7 @@ export class Stage {
   }
   setDash(d: Dash | null) { this.dash = d ? new DashRenderer(d) : null; if (d) this.screenMode = "dash"; }
   showImage(src: string) { const img = new Image(); img.src = src; this.screenImage = img; this.screenMode = "image"; }
-  replayIntro() { this.buildStart = this.t + 0.1; this.screenAt = this.t; this.screenMode = "saver"; this.lights.ignite = 0; this.model.setBuild(0); }
+  replayIntro() { this.buildStart = this.t + 0.1; this.screenAt = this.t; this.screenMode = "saver"; }
 
   resize() {
     const w = this.host.clientWidth || 1, h = this.host.clientHeight || 1;
@@ -289,11 +289,10 @@ export class Stage {
     this.t += dt;
     const t = this.t;
 
-    // intro: body extrudes, parts appear, LEDs ignite, screen boots on the logo then the dash
+    // intro: the camera flies in (wheel whole and lit throughout), the screen boots on the logo then the dash
     if (t - this.buildStart < 3) {
       const b = (t - this.buildStart) / 1.8;
       this.model.setBuild(b);
-      this.lights.ignite = Math.max(0, Math.min(1, (t - this.buildStart - 1.4) / 1.2));
     }
     if (this.screenMode === "saver" && this.screenAt >= 0 && t - this.screenAt > 4.2 && this.dash) this.screenMode = "dash";
 
