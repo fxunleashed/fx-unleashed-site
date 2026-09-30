@@ -6,6 +6,10 @@ export interface WheelLed { i: number; group: string; x: number; y: number; r: n
 export interface Wheel {
   id: string; name: string; maker: string; status: "supported" | "beta" | "planned"; tagline: string;
   size: [number, number]; depthMm: number; widthMm: number; outline: [number, number][];
+  /** Openings through the faceplate (left side; mirrored). */
+  cutouts?: { x: number; y: number; w: number; h: number; r: number }[];
+  /** Grips (left side; mirrored): a polygon in outline units, built thicker and rounded. */
+  grips?: { points: [number, number][] }[];
   bezel: { x: number; y: number; w: number; h: number; r: number };
   screen: { x: number; y: number; w: number; h: number; px: [number, number] };
   leds: WheelLed[]; groups: Record<string, { label: string; leds: number[] }>;

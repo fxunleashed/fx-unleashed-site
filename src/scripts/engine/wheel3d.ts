@@ -109,6 +109,17 @@ export function buildWheel(w: Wheel, opts: { quality?: "high" | "low" } = {}): W
   const pts = w.outline.map(([x, y]) => P(x, y));
   shape.moveTo(pts[0].x, pts[0].y);
   shape.splineThru([...pts.slice(1), pts[0]]);
+  // thumb openings: rounded boxes through the faceplate, both sides
+  const roundedBox = (x: number, y: number, bw: number, bh: number, r: number) => {
+    const h = new THREE.Path(), n = 10, c: [number, number][] = [];
+    const corner = (cx: number, cy: number, a0: number) => { for (let i = 0; i <= n; i++) { const a = a0 + (i / n) * Math.PI / 2; c.push([cx + Math.cos(a) * r, cy + Math.sin(a) * r]); } };
+    corner(x + bw - r, y + r, -Math.PI / 2); corner(x + bw - r, y + bh - r, 0); corner(x + r, y + bh - r, Math.PI / 2); corner(x + r, y + r, Math.PI);
+    c.forEach(([px, py], i) => { const v = P(px, py); if (i === 0) h.moveTo(v.x, v.y); else h.lineTo(v.x, v.y); });
+    h.closePath();
+    return h;
+  };
+  for (const c of w.cutouts ?? [])
+    for (const x of [c.x, w.size[0] - c.x - c.w]) shape.holes.push(roundedBox(x, c.y, c.w, c.h, c.r));
   const bodyGeo = keep(new THREE.ExtrudeGeometry(shape, {
     depth, bevelEnabled: true, bevelThickness: BEVEL, bevelSize: 0.022, bevelSegments: seg, curveSegments: 48, steps: 1,
   }));
@@ -122,6 +133,26 @@ export function buildWheel(w: Wheel, opts: { quality?: "high" | "low" } = {}): W
   const body = new THREE.Mesh(bodyGeo, bodyMat);
   body.castShadow = body.receiveShadow = true;
   group.add(body);
+
+  // ----- grips: each grip's polygon (left side, mirrored), thicker than the plate and well rounded, soft rubber -----
+  const gripMat = keep(new THREE.MeshStandardMaterial({ color: 0x1b1c1f, roughness: 0.92, metalness: 0, bumpMap: keep(noiseTexture(128, 60)), bumpScale: 0.35 }));
+  const grips: THREE.Mesh[] = [];
+  for (const gdef of w.grips ?? []) {
+    for (const right of [false, true]) {
+      const poly = gdef.points.map(([x, y]) => [right ? w.size[0] - x : x, y] as [number, number]);
+      if (poly.length < 3) continue;
+      const gs = new THREE.Shape(), gp = poly.map(([x, y]) => P(x, y));
+      gs.moveTo(gp[0].x, gp[0].y); for (const q of gp.slice(1)) gs.lineTo(q.x, q.y); gs.closePath();
+      // a thin core with a big bevel pulled inwards: a nearly round cross-section, the outline unchanged
+      const gd = 0.24, round = 0.13; // 0.5 thick in all, the faceplate is 0.34
+      const gg = keep(new THREE.ExtrudeGeometry(gs, { depth: gd, bevelEnabled: true, bevelThickness: round, bevelSize: round, bevelOffset: -round, bevelSegments: Math.max(8, seg), curveSegments: 24 }));
+      gg.translate(0, 0, -gd / 2 - 0.03); // a little further back than forward, like the real handles
+      const grip = new THREE.Mesh(gg, gripMat);
+      grip.castShadow = grip.receiveShadow = true;
+      grips.push(grip);
+      group.add(grip);
+    }
+  }
 
   // ----- neon rim: a thin red glowing line just inside the front edge -----
   // inset along each point's normal (the traced outline has concave parts, so not towards the centre)
@@ -329,15 +360,15 @@ export function buildWheel(w: Wheel, opts: { quality?: "high" | "low" } = {}): W
   group.add(qrRing);
 
   // ----- build-in and LEDs -----
-  const parts = group.children.filter(c => c !== body);
+  const parts = group.children.filter(c => c !== body && !grips.includes(c as THREE.Mesh));
   function setBuild(t: number) {
     const e = 1 - Math.pow(1 - Math.max(0, Math.min(1, t)), 3);
     body.scale.z = Math.max(0.001, e);
+    for (const g of grips) g.scale.z = Math.max(0.001, e);
     rimMat.color.setRGB(0.5 * e, 0.035 * e, 0.05 * e);
     for (const [i, p] of parts.entries()) {
       const at = Math.max(0, Math.min(1, (t - 0.35 - (i / parts.length) * 0.4) / 0.25));
       p.visible = at > 0;
-      p.scale.setScalar(p === rim ? 1 : 0.6 + 0.4 * at);
     }
   }
   function setLeds(frame: Led[]) {
