@@ -170,7 +170,7 @@ export function buildWheel(w: Wheel, opts: { quality?: "high" | "low" } = {}): W
 
   // ----- bezel and screen -----
   const b = w.bezel, s = w.screen;
-  const bezelMat = keep(new THREE.MeshPhysicalMaterial({ color: 0x050607, roughness: 0.25, metalness: 0.1, clearcoat: 1, clearcoatRoughness: 0.03 }));
+  const bezelMat = keep(new THREE.MeshStandardMaterial({ color: 0x0a0b0d, roughness: 0.55, metalness: 0 })); // satin: a mirror finish flickered on its rounded edges
   const bezel = new THREE.Mesh(keep(new RoundedBoxGeometry(b.w * k, b.h * k, 0.07, 6, b.r * k)), bezelMat);
   bezel.position.copy(toLocal(b.x + b.w / 2, b.y + b.h / 2, front + 0.035));
   group.add(bezel);
@@ -178,20 +178,16 @@ export function buildWheel(w: Wheel, opts: { quality?: "high" | "low" } = {}): W
   const screenTexture = keep(new THREE.CanvasTexture(screenCanvas));
   screenTexture.colorSpace = THREE.SRGBColorSpace;
   screenTexture.anisotropy = 8;
-  const screenMat = keep(new THREE.MeshBasicMaterial({ map: screenTexture, toneMapped: false, color: new THREE.Color(0.95, 0.95, 0.95) })); // under the bloom threshold: text stays crisp
+  const screenMat = keep(new THREE.MeshBasicMaterial({ map: screenTexture, toneMapped: false, color: new THREE.Color(0.95, 0.95, 0.95) })); // just under full white: text stays crisp
   const screen = new THREE.Mesh(keep(new THREE.PlaneGeometry(s.w * k, s.h * k)), screenMat);
   screen.position.copy(toLocal(s.x + s.w / 2, s.y + s.h / 2, front + 0.0712));
   group.add(screen);
-  // glass over the screen: catches reflections
-  const glassMat = keep(new THREE.MeshPhysicalMaterial({ color: 0x000000, roughness: 0.02, metalness: 0, clearcoat: 1, transparent: true, opacity: 0.12, envMapIntensity: 1.2 }));
-  const glass = new THREE.Mesh(keep(new THREE.PlaneGeometry(b.w * k * 0.97, b.h * k * 0.95)), glassMat);
-  glass.position.copy(toLocal(b.x + b.w / 2, b.y + b.h / 2, front + 0.0725));
-  group.add(glass);
+  // (no reflective glass layer over the screen: it put a moving band of light across the dash)
 
   // ----- LEDs -----
   const ledMeshes: THREE.Mesh[] = [];
   const ledMats: THREE.MeshBasicMaterial[] = [];
-  const smoked = keep(new THREE.MeshPhysicalMaterial({ color: 0x120405, roughness: 0.1, transparent: true, opacity: 0.55, clearcoat: 1 }));
+  const smoked = keep(new THREE.MeshStandardMaterial({ color: 0x120405, roughness: 0.5, transparent: true, opacity: 0.55 }));
   const revLeds = w.groups.rev?.leds ?? [];
   if (revLeds.length) {
     const xs = revLeds.map(i => w.leds[i].x), y = w.leds[revLeds[0]].y;
@@ -270,6 +266,15 @@ export function buildWheel(w: Wheel, opts: { quality?: "high" | "low" } = {}): W
     return s;
   };
 
+  // Glow: a soft halo per LED in the LED's own colour, at a fixed size (replaces the bloom pass, which clipped colours
+  // to white and made pale colours flare more than saturated ones).
+  const halo = (() => {
+    const cv = canvas(128, 128), c = cv.getContext("2d")!, g = c.createRadialGradient(64, 64, 0, 64, 64, 64);
+    g.addColorStop(0, "rgba(255,255,255,0.55)"); g.addColorStop(0.25, "rgba(255,255,255,0.28)"); g.addColorStop(0.6, "rgba(255,255,255,0.07)"); g.addColorStop(1, "rgba(255,255,255,0)");
+    c.fillStyle = g; c.fillRect(0, 0, 128, 128);
+    return keep(new THREE.CanvasTexture(cv));
+  })();
+  const glows: THREE.SpriteMaterial[] = [];
   for (const led of w.leds) {
     const mat = keep(new THREE.MeshBasicMaterial({ color: 0x000000, toneMapped: false }));
     let mesh: THREE.Mesh;
@@ -335,6 +340,14 @@ export function buildWheel(w: Wheel, opts: { quality?: "high" | "low" } = {}): W
     mesh.userData.index = led.i;
     ledMeshes[led.i] = mesh;
     ledMats[led.i] = mat;
+    const gm = keep(new THREE.SpriteMaterial({ map: halo, color: 0x000000, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false }));
+    const sprite = new THREE.Sprite(gm);
+    const size = (led.group === "encoders" ? 54 : led.group === "buttons" ? 38 : 22) * k;
+    sprite.scale.set(size, size, 1);
+    sprite.position.copy(toLocal(led.x, led.y, front + (led.group === "encoders" || led.group === "buttons" ? 0.03 : 0.08)));
+    sprite.raycast = () => {}; // never picked instead of the LED
+    group.add(sprite);
+    glows[led.i] = gm;
   }
 
   // the 7-way switch below BB: a small black knob on a knurled ring, no light
@@ -366,11 +379,11 @@ export function buildWheel(w: Wheel, opts: { quality?: "high" | "low" } = {}): W
     for (const led of w.leds) {
       const f = frame[led.i], m = ledMats[led.i];
       if (!f || !m) continue;
-      const boost = led.group === "buttons" ? 1.4 : led.group === "encoders" ? 1.05 : 1.6;
-      const off = 0.012;
-      const a = f.a;
-      // HDR colour when lit (the bloom pass makes the glow)
-      m.color.setRGB(off + f.c[0] * a * boost, off * 0.95 + f.c[1] * a * boost, off + f.c[2] * a * boost);
+      const off = 0.012, a = Math.min(1, f.a);
+      // the LED itself: its true colour, never above 1 (no clipping to white)
+      m.color.setRGB(off + f.c[0] * a * (1 - off), off + f.c[1] * a * (1 - off), off + f.c[2] * a * (1 - off));
+      const g = glows[led.i];
+      if (g) g.color.setRGB(f.c[0] * a, f.c[1] * a, f.c[2] * a);
     }
   }
 

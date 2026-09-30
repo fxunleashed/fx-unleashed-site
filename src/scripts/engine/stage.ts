@@ -1,9 +1,8 @@
-// The 3D stage used by every page with a wheel: renderer, lighting, bloom and a film finish, camera "shots" the
+// The 3D stage used by every page with a wheel: renderer, lighting, a film finish, camera "shots" the
 // page scrolls between, pointer parallax, the build-in intro, LED picking, and the live screen (dash or saver).
 import * as THREE from "three";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
-import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
 import { OutputPass } from "three/examples/jsm/postprocessing/OutputPass.js";
 import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass.js";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
@@ -64,7 +63,6 @@ export class Stage {
   scene = new THREE.Scene();
   camera: THREE.PerspectiveCamera;
   composer: EffectComposer;
-  bloom: UnrealBloomPass;
   film: ShaderPass;
   model: WheelModel;
   car = new Car();
@@ -113,7 +111,7 @@ export class Stage {
     this.camera = new THREE.PerspectiveCamera(32, 1, 0.1, 80);
     const pmrem = new THREE.PMREMGenerator(this.renderer);
     this.scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
-    this.scene.environmentIntensity = 0.4; // the room's lights, reflected in the clear coat, stay well under the bloom threshold
+    this.scene.environmentIntensity = 0.4; // soft reflections only
     if (!opts.transparent) this.scene.background = new THREE.Color(0x050608);
     this.scene.fog = new THREE.Fog(0x050608, 9, 22);
 
@@ -137,12 +135,10 @@ export class Stage {
     if (opts.particles !== false) this.makeParticles(low ? 250 : 700);
     this.makeStreaks();
 
-    // post: bloom for the LEDs and screen, then tone mapping, then a film finish
+    // post: tone mapping, then a film finish (the LEDs draw their own glow; no bloom pass: it clipped colours to white)
     const target = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, samples: low ? 0 : 4 });
     this.composer = new EffectComposer(this.renderer, target);
     this.composer.addPass(new RenderPass(this.scene, this.camera));
-    this.bloom = new UnrealBloomPass(new THREE.Vector2(512, 512), low ? 0.45 : 0.55, 0.32, 1.0); // threshold 1: only HDR emitters glow
-    this.composer.addPass(this.bloom);
     this.composer.addPass(new OutputPass());
     this.film = new ShaderPass(FilmShader);
     this.composer.addPass(this.film);
