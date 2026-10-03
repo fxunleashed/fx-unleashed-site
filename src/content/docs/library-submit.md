@@ -1,5 +1,10 @@
 # Share and submit dashes
 
+> **Where this fits:** step 4 of the [setup guide](/start/#4-pick-your-dashes-and-lights). It needs the plugin
+> ([step 2](/start/#2-install-the-plugin)); to see a dash on the wheel you also need the wheel app
+> ([step 1](/start/#1-install-the-wheel-app)), and the screen's RAM patch ([step 3](/start/#3-turn-on-picture-memory), optional but
+> highly recommended) for full-colour pictures. Making a dash: the [dash designer](/docs/dash-designer/).
+
 Three ways, from the quickest to the widest. None of them needs Git.
 
 ## Send one to a friend
@@ -17,14 +22,17 @@ preview, an **Install in the plugin** button and a download.
 
 ## Submit it to the library
 
-For everyone to use. You need to have made it, or have its author's permission.
+For everyone to use. You need to have made it, or have its author's permission. You also need a **free GitHub account**: the
+submit form is a GitHub page, and that's the only thing to sign up for (nothing to install, no Git).
 
 1. **Make it** in the plugin's [designer](/docs/dash-designer/) (Dashes tab, *Edit in the designer*) until its checks show no
    warnings: no flashing, text that fits, low USB traffic.
 2. **Package it:** Dashes tab, pick your dash, **Package for the library**. Fill in the name, games, tags, licence and
-   version, and tick that it's yours. It writes a file called `<id>.fxdash.zip` and offers to open the submit form.
-3. **Submit it:** open the [Submit a dash](https://github.com/fxunleashed/fx-unleashed-library/issues/new?template=submit-dash.yml)
-   form, drag the `.zip` into the box, tick the three boxes and submit.
+   version, and tick that it's yours. It writes a file called `<id>.fxdash.zip`, shows it in Explorer and offers to open the
+   submit form.
+3. **Submit it:** on the [Submit a dash](https://github.com/fxunleashed/fx-unleashed-library/issues/new?template=submit-dash.yml)
+   form (sign in to GitHub if it asks), add the `.zip` to the **Package** box: drag it in from Explorer, or click **selecting
+   them** under the box and pick the file. Tick the three boxes and press **Submit new issue**.
 4. **A bot checks it** (format, size, no scripts, the preview, the checksum). If everything passes it's **published on the spot**:
    the form closes with a link, and it's in the library and the plugin a few minutes later, credited to you. If something's
    wrong it tells you exactly what; fix it, replace the `.zip` by editing the issue, and it checks again.

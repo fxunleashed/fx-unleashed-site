@@ -3,6 +3,7 @@ import Base from "../layouts/Base.astro";
 import { render, legal, byName } from "../lib/md";
 import { BUILDS, LAYERS } from "../data/firmware";
 import { site } from "../config";
+import SetupPath from "../components/SetupPath.astro";
 const warning = render(byName(legal, "firmware-warning.md")).html;
 ---
 <Base title="Firmware" description="Download the FX Unleashed wheel app for the Simagic FX Pro, install it in a few simple steps, and go back to stock whenever you like.">
@@ -10,6 +11,8 @@ const warning = render(byName(legal, "firmware-warning.md")).html;
     <p class="eyebrow">Firmware</p>
     <h1>The <span class="red">wheel app</span></h1>
     <p class="lead">Unleashed mode needs our version of the wheel's own small program. Download it here, then follow the install steps: about 10 minutes, and Simagic's original is always one reinstall away.</p>
+
+    <SetupPath current={1} />
 
     <div class="warning prose" role="note" id="risks">
       <p class="eyebrow">Read this first</p>

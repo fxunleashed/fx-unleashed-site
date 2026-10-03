@@ -1,6 +1,7 @@
 ---
 import Base from "../layouts/Base.astro";
 import { site } from "../config";
+import SetupPath from "../components/SetupPath.astro";
 ---
 <Base title="Library" description="Dashes and screensavers for the FX Pro. Preview them live, install in a click.">
   <section class="wrap head">
@@ -22,10 +23,15 @@ import { site } from "../config";
   </section>
   <section class="wrap"><div class="tags" id="tags"></div><div class="grid-lib" id="grid"></div><p class="empty" id="empty" hidden>Nothing matches. Try fewer filters.</p></section>
 
+  <section class="wrap new-here">
+    <p class="muted">New here? To put a dash from this page on your wheel you need the plugin (step 2), and for Unleashed mode the wheel app (step 1). The screen's RAM patch (step 3) is optional but highly recommended: the picture-heavy dashes here are made for it.</p>
+    <SetupPath current={4} title="Where installing a dash fits" />
+  </section>
+
   <section class="wrap submit">
     <div class="card">
       <h3>Made one?</h3>
-      <p>Package it from the plugin (Dashes tab, "Package for the library") and send the file with the form: no Git, and if it passes the checks it is published right away. You can update it later the same way.</p>
+      <p>Package it from the plugin (Dashes tab, "Package for the library") and attach the file to the form (you need a free GitHub account, but no Git): if it passes the checks it is published right away. You can update it later the same way.</p>
       <a class="btn primary" href={`https://github.com/${site.libraryRepo}/issues/new?template=submit-dash.yml`}>Submit a dash</a>
       <a class="btn" href="/docs/library-submit/">How it works</a>
       <a class="btn small" href={`https://github.com/${site.libraryRepo}`}>Library repo</a>
@@ -71,7 +77,8 @@ import { site } from "../config";
   .tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 24px; }
   .grid-lib { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(340px, 100%), 1fr)); gap: 20px; perspective: 1200px; }
   .empty { text-align: center; padding: 60px; color: var(--text-3); }
-  .submit { padding: 80px 0 120px; }
+  .new-here { padding: 60px 0 0; }
+  .submit { padding: 40px 0 120px; }
   .submit .card { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
   .submit .card h3 { margin: 0 20px 0 0; }
   .submit .card p { margin: 0; flex: 1 1 300px; }
