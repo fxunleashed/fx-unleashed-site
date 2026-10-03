@@ -18,7 +18,7 @@ function copy(from, to) {
 
 let n = 0;
 if (fs.existsSync(plugin)) {
-  // usb-mode.md stays off the site: it is the developer reference with firmware internals (NEXT.md O4 review first)
+  // usb-mode.md stays off the site: it is the developer reference, not a user guide
   const docs = ["setup.md", "dash-format.md", "dash-designer.md"];
   for (const f of docs) if (fs.existsSync(path.join(plugin, "docs", f))) { copy(path.join(plugin, "docs", f), path.join(root, "src/content/docs", f)); n++; }
   for (const f of fs.readdirSync(path.join(plugin, "docs/legal")).filter(f => f.endsWith(".md") && f !== "README.md")) {

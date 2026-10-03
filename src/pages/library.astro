@@ -25,8 +25,9 @@ import { site } from "../config";
   <section class="wrap submit">
     <div class="card">
       <h3>Made one?</h3>
-      <p>Package it from the plugin (Dashes tab, "Package for the library") and open a pull request. The checks run by themselves.</p>
-      <a class="btn" href="/docs/library-submit/">How to submit</a>
+      <p>Package it from the plugin (Dashes tab, "Package for the library") and send the file with the form: no Git, and if it passes the checks it is published right away. You can update it later the same way.</p>
+      <a class="btn primary" href={`https://github.com/${site.libraryRepo}/issues/new?template=submit-dash.yml`}>Submit a dash</a>
+      <a class="btn" href="/docs/library-submit/">How it works</a>
       <a class="btn small" href={`https://github.com/${site.libraryRepo}`}>Library repo</a>
     </div>
   </section>
@@ -44,7 +45,8 @@ import { site } from "../config";
         <div class="chips" id="item-tags"></div>
         <div class="actions">
           <button class="btn primary" id="install">Install in the plugin</button>
-          <a class="btn" id="download" download>Download .json</a>
+          <button class="btn" id="copy-link" type="button">Copy link</button>
+          <a class="btn" id="download" download>Download file</a>
         </div>
         <p class="note" id="install-note"></p>
         <p class="terms">Made by FX Unleashed, not by Simagic. Install at your own risk. <a href="/legal/#library-terms">Library terms</a></p>

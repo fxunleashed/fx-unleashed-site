@@ -112,7 +112,8 @@ async function open(i: LibraryItem) {
   $("item-facts").replaceChildren(...facts.map(([k, v]) => { const d = document.createElement("div"); d.innerHTML = "<dt></dt><dd></dd>"; d.querySelector("dt")!.textContent = k; d.querySelector("dd")!.textContent = v; return d; }));
   $("item-tags").replaceChildren(...(i.Tags ?? []).map(t => { const s = document.createElement("span"); s.className = "chip"; s.textContent = "#" + t; return s; }));
   const dl = $<HTMLAnchorElement>("download");
-  dl.href = url(i.DashUrl); dl.setAttribute("download", `${i.Id}.json`);
+  dl.href = url(i.DashUrl); dl.setAttribute("download", `${i.Id}.fxdash.json`);
+  $("copy-link").textContent = "Copy link";
   updateInstall();
   if (!dlg.open) dlg.showModal();
   await showWheel(i);
@@ -151,7 +152,7 @@ function updateInstall() {
   btn.disabled = !plugin.available;
   btn.textContent = inst ? (inst.version === i.Version ? "Installed ✓" : `Update to v${i.Version}`) : "Install in the plugin";
   note.textContent = plugin.available ? "The plugin asks you to confirm, then it's on the wheel: no restart."
-    : "Install needs FX Unleashed running in SimHub on this PC (your browser may ask to allow access to local devices). Or download the file and use the plugin's Import.";
+    : "Install needs FX Unleashed running in SimHub on this PC (your browser may ask to allow access to local devices). Or download the file and drop it on the plugin's Dashes tab (or use Import a file).";
 }
 
 $("install").addEventListener("click", async () => {
@@ -162,6 +163,13 @@ $("install").addEventListener("click", async () => {
     note.textContent = r.installed ? `Installed v${r.version}. It's in the plugin now.` : "Not installed: " + (r.error ?? "unknown");
     plugin = await pluginState(); updateInstall(); render();
   } catch { note.textContent = "Couldn't reach the plugin."; }
+});
+/** A link to this item (its page opens the preview and the Install button): what to send a friend. */
+$("copy-link").addEventListener("click", async () => {
+  const i = current!, link = `${location.origin}${location.pathname}#${i.Kind}-${i.Id}`, b = $("copy-link");
+  try { await navigator.clipboard.writeText(link); b.textContent = "Link copied ✓"; }
+  catch { b.textContent = "Copy it from the address bar"; }
+  setTimeout(() => { if (current === i) b.textContent = "Copy link"; }, 2500);
 });
 const close = () => { dlg.close(); };
 $("close").addEventListener("click", close);

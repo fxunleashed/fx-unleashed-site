@@ -7,7 +7,7 @@ export const site = {
   description:
     "A free SimHub plugin that unleashes your Simagic FX Pro: your own dashes, every LED in any colour, screensavers, " +
     "ready-made dashes, and the dash button, all driven from SimHub.",
-  // GitHub (the org and repos are created before launch, see NEXT.md N in the plugin repo)
+  // GitHub
   github: "https://github.com/fxunleashed",
   pluginRepo: "fxunleashed/fx-unleashed",
   libraryRepo: "fxunleashed/fx-unleashed-library",
