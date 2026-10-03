@@ -39,12 +39,21 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     // reveal on scroll
     const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }), { rootMargin: "0px 0px -10% 0px" });
     document.querySelectorAll(".reveal").forEach(el => io.observe(el));
-    // the pointer's glow, and the glowing edge of cards under the pointer
-    const root = document.documentElement;
+    // the pointer's glow, and the glowing edge of cards under the pointer. Once a frame, with the glow's variables on
+    // the glow itself: set on <html> they restyled the whole page on every move, and reading the card's rect right
+    // after that forced a layout.
+    const glow = document.querySelector<HTMLElement>(".pointer-glow");
+    let mx = 0, my = 0, over: Element | null = null, queued = false;
+    function moveGlow() {
+      queued = false;
+      const card = over?.closest?.(".card.glow") as HTMLElement | null;
+      const r = card?.getBoundingClientRect(); // read before anything is written
+      if (card && r) { card.style.setProperty("--mx", mx - r.left + "px"); card.style.setProperty("--my", my - r.top + "px"); }
+      glow?.style.setProperty("--px", mx + "px"); glow?.style.setProperty("--py", my + "px");
+    }
     addEventListener("pointermove", e => {
-      root.style.setProperty("--px", e.clientX + "px"); root.style.setProperty("--py", e.clientY + "px");
-      const card = (e.target as Element)?.closest?.(".card.glow") as HTMLElement | null;
-      if (card) { const r = card.getBoundingClientRect(); card.style.setProperty("--mx", e.clientX - r.left + "px"); card.style.setProperty("--my", e.clientY - r.top + "px"); }
+      mx = e.clientX; my = e.clientY; over = e.target as Element | null;
+      if (!queued) { queued = true; requestAnimationFrame(moveGlow); }
     }, { passive: true });
   </script>
 </body>

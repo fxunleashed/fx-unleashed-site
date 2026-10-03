@@ -4,7 +4,9 @@ export const BUILDS = [
   { n: 4, title: "Every light, any colour · the PC owns the screen", status: "tested", text: "All 38 LEDs take their colour from the PC; the plugin can take over the screen and gives it back when it stops (1 s keepalive)." },
   { n: 5, title: "The dash button goes to the PC", status: "tested", text: "In USB mode the dash button becomes controller button 40 and stops switching the wheel's own pages." },
   { n: 6, title: "USB takes over from the base", status: "tested", text: "A wheel that started on the base restarts into USB mode when a PC is on its cable (at most three times per power-on)." },
-  { n: 7, title: "The wheel says which build it runs", status: "next", text: "On the plugin's question the wheel reports its build number, so no more \"my wheel runs the patch\" checkbox." },
+  { n: 7, title: "The wheel says which build it runs", status: "tested", text: "On the plugin's question the wheel reports its build number, so no more \"my wheel runs the patch\" checkbox." },
+  { n: 8, title: "You choose the dash button and the upper paddles", status: "tested", text: "The dash button and the two upper paddles are sent to buttons you pick in the plugin (the paddles send nothing over USB on a stock wheel). Only active in USB mode." },
+  { n: 9, title: "48 buttons: room for every control", status: "tested", text: "The wheel reports 48 buttons instead of 40, so the dash button and the upper paddles get their own slots (41 to 43) and share nothing with an encoder or a roller. SimPro still connects and reads the wheel as before." },
 ];
 
 export const LAYERS = [

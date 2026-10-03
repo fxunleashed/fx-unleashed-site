@@ -6,13 +6,13 @@ import { site } from "../config";
 import Icon from "../components/Icon.astro";
 const w = defaultWheel;
 const features = [
-  { icon: "library", title: "Community library", text: "Dashes and screensavers made by other drivers. Preview them live, install in a click, no restart.", href: "/library/" },
+  { icon: "library", title: "Ready-made dashes", text: "Dashes and screensavers made for the screen. Preview them live, install in a click, no restart.", href: "/library/" },
   { icon: "designer", title: "Dash designer", text: "Draw your own dash in the browser, see it on the wheel as you edit, check it can't flicker or lag.", href: "/docs/dash-designer/" },
-  { icon: "mirror", title: "Screen mirror", text: "An OBS browser source with your wheel's screen and lights, live. Nobody else can show this wheel on stream.", href: "/docs/setup/#7-dashes" },
-  { icon: "device", title: "SimHub LED device", text: "Your wheel shows up in SimHub's Devices: any SimHub LED profile, or ATSR-Hub, drives all 38 lights.", href: "/docs/setup/#8-lights" },
-  { icon: "car", title: "Per car, per game", text: "Dashes, light presets, even your base's rotation and force follow the car you drive.", href: "/docs/setup/" },
+  { icon: "mirror", title: "Screen mirror", text: "An OBS browser source with your wheel's screen and lights, live. Nobody else can show this wheel on stream.", href: "/start/#7-dashes" },
+  { icon: "device", title: "SimHub LED device", text: "Your wheel shows up in SimHub's Devices: any SimHub LED profile, or ATSR-Hub, drives all 38 lights.", href: "/start/#8-lights" },
+  { icon: "car", title: "Per car, per game", text: "Dashes, light presets, even your base's rotation and force follow the car you drive.", href: "/start/" },
   { icon: "flag", title: "Alerts that matter", text: "Flags, spotter, pit limiter, ABS and TC, low fuel, custom alerts from any SimHub value, in your order.", href: "/lab/" },
-  { icon: "moon", title: "Night mode", text: "A ceiling for every light and a dimmer screen, on a schedule or with ATSR-Hub's night mode.", href: "/docs/setup/#8-lights" },
+  { icon: "moon", title: "Night mode", text: "A ceiling for every light and a dimmer screen, on a schedule or with ATSR-Hub's night mode.", href: "/start/#8-lights" },
   { icon: "update", title: "Updates itself", text: "One click installs a new version, one click rolls it back. Your settings come with you.", href: "/changelog/" },
 ];
 ---
@@ -21,14 +21,14 @@ const features = [
   <div id="stage" class="stage" aria-hidden="true">
     <img class="stage-fallback" src="/brand/mark-512.png" alt="" />
   </div>
-  <div class="hud" id="hud" aria-hidden="true"><div><b id="hud-speed">0</b><span>km/h</span></div><div class="gear"><b id="hud-gear">N</b></div><div><b id="hud-rpm">0</b><span>rpm</span></div></div>
 
   <!-- 1. hero -->
   <section class="chapter hero" data-shot="hero">
     <div class="wrap">
-      <p class="eyebrow">{w.maker} {w.name} · SimHub · free</p>
+      <p class="eyebrow">{w.maker} {w.name} · SimHub</p>
       <h1 class="title"><span>Your wheel.</span><span class="red">Unleashed.</span></h1>
-      <p class="lead">Your own dashes on the {w.screen.px[0]}×{w.screen.px[1]} screen. All {w.leds.length} lights in any colour. Screensavers, a community library and the dash button, all driven from SimHub.</p>
+      <p class="free"><span class="free-mark">Free &amp; open source</span></p>
+      <p class="lead">Your own dashes on the wheel's screen. All {w.leds.length} lights in any colour. Screensavers, ready-made dashes and the dash button, all driven from SimHub.</p>
       <div class="ctas">
         <a class="btn primary" href="/start/">Get started <span aria-hidden="true">→</span></a>
         <a class="btn" href="/library/">Browse the library</a>
@@ -37,7 +37,6 @@ const features = [
         <div><dt data-count={w.leds.length}>{w.leds.length}</dt><dd>lights, any colour</dd></div>
         <div><dt data-count="60">60</dt><dd>light frames a second</dd></div>
         <div><dt>1-click</dt><dd>dash installs</dd></div>
-        <div><dt>€0</dt><dd>free, open source</dd></div>
       </dl>
     </div>
     <a class="scroll-hint" href="#lights" aria-label="Scroll"><span></span></a>
@@ -50,13 +49,9 @@ const features = [
       <h2>Every light.<br />Any colour.</h2>
       <p>Rev bar, side lights, button caps, encoder rings: {w.leds.length} LEDs, each its own colour, 60 times a second. Shift lights follow each car's real data.</p>
       <div class="chips" id="presets">
-        {PRESETS.map((p, i) => <button class="chip" data-preset={p.id} aria-pressed={i === 0 ? "true" : "false"}><span class="dot" style={`background:${p.swatch};color:${p.rev[p.rev.length - 1]}`}></span>{p.name}</button>)}
+        {PRESETS.map((p, i) => <button class="chip" data-preset={p.id} aria-pressed={i === 0 ? "true" : "false"}><span class="dot" style={`background:${p.swatch};color:${p.accent}`}></span>{p.name}</button>)}
       </div>
-      <div class="row">
-        <button class="btn primary" id="rev-btn">Hold to rev</button>
-        <span class="muted small">or hold <span class="kbd">Space</span></span>
-      </div>
-      <p class="muted small">Tip: click any light on the wheel to paint it. <a href="/lab/" class="red">Open the light lab →</a></p>
+      <p class="muted small">Click any light on the wheel to change its colour. <a href="/lab/" class="red">Open the light lab →</a></p>
     </div></div>
   </section>
 
@@ -64,8 +59,8 @@ const features = [
   <section class="chapter" id="dashes" data-shot="screen">
     <div class="wrap"><div class="panel glass right reveal">
       <p class="eyebrow">02 · Dashes</p>
-      <h2>Dashes that are yours.</h2>
-      <p>Pick one per car, switch with the dash button, or design your own. What you see on the wheel here is the real dash file, rendered live from a simulated lap.</p>
+      <h2>Your own dashes.</h2>
+      <p>Pick one per car, switch with the dash button, or design your own. The wheel here shows the real dash file with simulated data.</p>
       <div class="chips" id="dash-chips"><span class="muted small">Loading the library…</span></div>
       <p class="small muted" id="dash-meta"></p>
       <div class="row"><a class="btn" href="/library/">All dashes</a><a class="btn small" href="/docs/dash-designer/">The designer</a></div>
@@ -73,11 +68,11 @@ const features = [
   </section>
 
   <!-- 4. alerts -->
-  <section class="chapter" id="alerts" data-shot="controls">
+  <section class="chapter" id="alerts" data-shot="alerts">
     <div class="wrap"><div class="panel glass left reveal">
       <p class="eyebrow">03 · Alerts</p>
-      <h2>See it before you think it.</h2>
-      <p>Flags on the side lights, the spotter at the edge of your eye, ABS and TC rings that flash while they work. Your order, your colours, plus custom alerts from any SimHub value.</p>
+      <h2>Alerts on the lights.</h2>
+      <p>Flags on the encoders, a car alongside flashing the six buttons on its side, ABS and TC on the small lights beside the rev bar. Your order, your colours, plus custom alerts from any SimHub value.</p>
       <div class="chips" id="flags">
         <button class="chip" data-flag="yellow"><span class="dot" style="background:#ffd400;color:#ffd400"></span>Yellow</button>
         <button class="chip" data-flag="blue"><span class="dot" style="background:#2f6bff;color:#2f6bff"></span>Blue</button>
@@ -94,32 +89,11 @@ const features = [
     </div></div>
   </section>
 
-  <!-- 5. drive -->
-  <section class="chapter" id="drive" data-shot="drive">
-    <div class="wrap"><div class="panel glass right reveal">
-      <p class="eyebrow">04 · Drive it</p>
-      <h2>Take it for a lap.</h2>
-      <p>You're driving now: the dash, the shift lights and the alerts all react. It's the same engine the plugin uses for its demo.</p>
-      <div class="keys">
-        <span><span class="kbd">W</span> / <span class="kbd">↑</span> throttle</span>
-        <span><span class="kbd">S</span> / <span class="kbd">↓</span> brake</span>
-        <span><span class="kbd">E</span> / <span class="kbd">Q</span> paddles</span>
-      </div>
-      <div class="pedals">
-        <button class="btn" id="brake-btn">Brake</button>
-        <button class="btn" id="down-btn">−</button>
-        <button class="btn" id="up-btn">+</button>
-        <button class="btn primary" id="gas-btn">Throttle</button>
-      </div>
-      <button class="chip" id="sound-btn" aria-pressed="false">♪ Engine sound</button>
-    </div></div>
-  </section>
-
-  <!-- 6. safety -->
+  <!-- 5. safety -->
   <section class="chapter" id="safety" data-shot="back">
     <div class="wrap"><div class="panel glass left reveal">
-      <p class="eyebrow">05 · Built carefully</p>
-      <h2>Your base is never touched.</h2>
+      <p class="eyebrow">04 · Safety</p>
+      <h2>Your base isn't touched.</h2>
       <p>Force feedback and base settings stay with SimPro. Unleashed mode changes only the wheel's own app, and every change is checked against the stock firmware in an emulator before it's tried on a real wheel. Going back to stock is SimPro's own reinstall.</p>
       <div class="row"><a class="btn" href="/firmware/">How the firmware is built</a></div>
     </div></div>
@@ -129,8 +103,8 @@ const features = [
     <!-- features -->
     <section class="section">
       <div class="wrap">
-        <p class="eyebrow reveal">Everything in the box</p>
-        <h2 class="reveal">One plugin. <span class="red">All of it.</span></h2>
+        <p class="eyebrow reveal">Features</p>
+        <h2 class="reveal">What's included</h2>
         <div class="grid four features">
           {features.map((f, i) => (
             <a class="card glow reveal" href={f.href} style={`transition-delay:${i * 50}ms`}>
@@ -147,11 +121,13 @@ const features = [
     <section class="section how">
       <div class="wrap">
         <p class="eyebrow reveal">How it works</p>
-        <h2 class="reveal">SimHub in. <span class="red">Your wheel</span> out.</h2>
+        <h2 class="reveal">SimHub drives the wheel</h2>
         <div class="flow reveal" id="flow">
           <svg viewBox="0 0 1000 300" role="img" aria-label="SimHub sends game data to the FX Unleashed plugin, which drives the wheel over its USB cable; SimPro keeps the base and force feedback.">
             <defs>
               <linearGradient id="wire" x1="0" x2="1"><stop offset="0" stop-color="#ff1f2d" stop-opacity="0.1" /><stop offset="0.5" stop-color="#ff1f2d" /><stop offset="1" stop-color="#ff1f2d" stop-opacity="0.1" /></linearGradient>
+              <!-- no drop-shadow filters here: on an animated SVG they are re-rasterised every frame, and their first use stalled scrolling for ~100 ms. The pulses glow with a gradient, the highlighted box with a baked image (public/img/flow-glow.png) -->
+              <radialGradient id="pulseglow"><stop offset="0" stop-color="#ff1f2d" stop-opacity="0.7" /><stop offset="1" stop-color="#ff1f2d" stop-opacity="0" /></radialGradient>
             </defs>
             <g class="wires" fill="none" stroke-width="2">
               <path id="w1" d="M180 110 C 260 110, 300 110, 380 110" stroke="url(#wire)" />
@@ -160,13 +136,13 @@ const features = [
             </g>
             <g class="nodes" font-family="Chakra Petch" text-anchor="middle">
               <g transform="translate(100,110)"><rect x="-80" y="-42" width="160" height="84" rx="16" /><text y="-4">SimHub</text><text y="18" class="sub">every game</text></g>
-              <g transform="translate(500,110)" class="hot"><rect x="-120" y="-50" width="240" height="100" rx="18" /><text y="-6">FX Unleashed</text><text y="18" class="sub">dashes · lights · library</text></g>
+              <g transform="translate(500,110)" class="hot"><image href="/img/flow-glow.png" x="-184" y="-114" width="368" height="228" /><rect x="-120" y="-50" width="240" height="100" rx="18" /><text y="-6">FX Unleashed</text><text y="18" class="sub">dashes · lights · library</text></g>
               <g transform="translate(900,110)"><rect x="-80" y="-42" width="160" height="84" rx="16" /><text y="-4">{w.name}</text><text y="18" class="sub">over its USB cable</text></g>
               <g transform="translate(100,230)"><rect x="-80" y="-30" width="160" height="60" rx="14" /><text y="6">SimPro</text></g>
               <g transform="translate(900,230)"><rect x="-80" y="-30" width="160" height="60" rx="14" /><text y="6">Base · FFB</text></g>
             </g>
             <g class="pulses">
-              {[0, 1, 2, 3, 4, 5].map(i => <circle r="4" class="pulse"><animateMotion dur="1.8s" begin={`${i * 0.3}s`} repeatCount="indefinite"><mpath href={i % 2 ? "#w2" : "#w1"} /></animateMotion></circle>)}
+              {[0, 1, 2, 3, 4, 5].map(i => <g class="pulse"><circle r="11" class="halo" /><circle r="4" /><animateMotion dur="1.8s" begin={`${i * 0.3}s`} repeatCount="indefinite"><mpath href={i % 2 ? "#w2" : "#w1"} /></animateMotion></g>)}
             </g>
           </svg>
         </div>
@@ -182,8 +158,8 @@ const features = [
     <section class="section">
       <div class="wrap">
         <p class="eyebrow reveal">Library</p>
-        <h2 class="reveal">Made by drivers. <span class="red">Shared with you.</span></h2>
-        <p class="lead reveal">Dashes and screensavers from the community, checked for size, format and scripts before they're listed. Install from here or from the plugin.</p>
+        <h2 class="reveal">Dashes and screensavers</h2>
+        <p class="lead reveal">Made for the FX Pro's screen: see each one running, then install it from here or from the plugin.</p>
         <div class="lib-row" id="lib-row"></div>
         <a class="btn reveal" href="/library/">Open the library →</a>
       </div>
@@ -193,7 +169,7 @@ const features = [
     <section class="section">
       <div class="wrap">
         <p class="eyebrow reveal">Wheels</p>
-        <h2 class="reveal">Built for the {w.name}. <span class="red">Ready for more.</span></h2>
+        <h2 class="reveal">Supported wheels</h2>
         <div class="grid three">
           {wheels.map(x => (
             <a class="card glow reveal wheel-card" href={`/wheels/${x.id}/`}>
@@ -211,9 +187,9 @@ const features = [
     <section class="section final">
       <div class="wrap center">
         <img src="/brand/mark-512.png" alt="" width="180" height="180" class="reveal badge-logo" />
-        <h2 class="reveal">Ready to <span class="red">unleash</span> it?</h2>
+        <h2 class="reveal">Get started</h2>
         <p class="lead reveal">Free, open source, and yours to change.</p>
-        <div class="ctas reveal"><a class="btn primary" href="/start/">Get started</a><a class="btn" href={site.github}>GitHub</a></div>
+        <div class="ctas reveal"><a class="btn primary" href="/start/">Setup guide</a><a class="btn" href={site.github}>GitHub</a></div>
       </div>
     </section>
   </div>
@@ -230,16 +206,11 @@ const features = [
   @keyframes pulse { 50% { transform: scale(1.03); } }
   .panel.reveal { transform: translateY(40px) scale(0.98); }
   .panel.reveal.in { transform: none; }
-  .stage { position: fixed; inset: 0; z-index: 0; transition: opacity 0.4s; }
+  .stage { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; height: 100lvh; z-index: 0; transition: opacity 0.4s; }
+  /* the largest viewport height: a phone's address bar sliding in and out doesn't resize (and blank) the canvas */
   .stage :global(canvas) { width: 100% !important; height: 100% !important; }
   .stage-fallback { position: absolute; top: 50%; left: 50%; width: 320px; transform: translate(-50%, -50%); opacity: 0.25; }
   .stage.live .stage-fallback { display: none; }
-  .hud { position: fixed; z-index: 2; left: 50%; bottom: 36px; transform: translateX(-50%); display: flex; gap: 36px; align-items: end; opacity: 0; transition: opacity 0.5s; pointer-events: none; font-family: var(--display); }
-  .hud.on { opacity: 1; }
-  .hud div { text-align: center; }
-  .hud b { display: block; font-size: 44px; line-height: 1; font-variant-numeric: tabular-nums; }
-  .hud .gear b { font-size: 84px; color: var(--red); text-shadow: 0 0 30px var(--red-glow); }
-  .hud span { font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--text-3); }
 
   .chapter { position: relative; z-index: 1; min-height: 100vh; display: flex; align-items: center; padding: 110px 0 60px; pointer-events: none; }
   .chapter .panel, .chapter .ctas, .chapter a, .chapter button { pointer-events: auto; }
@@ -249,9 +220,6 @@ const features = [
   .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0; }
   .row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin: 16px 0; }
   .small { font-size: 13px; }
-  .keys { display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px; color: var(--text-2); margin: 16px 0; }
-  .pedals { display: grid; grid-template-columns: 1fr auto auto 1fr; gap: 8px; margin: 16px 0; }
-  .pedals .btn { justify-content: center; touch-action: none; }
 
   .hero { align-items: flex-end; padding-bottom: 12vh; }
   .hero .lead { max-width: 560px; }
@@ -260,6 +228,9 @@ const features = [
   .title span { display: block; opacity: 0; transform: translateY(40px); animation: rise 1.2s var(--ease) forwards; }
   .title span:nth-child(2) { animation-delay: 0.25s; text-shadow: 0 0 60px var(--red-glow); }
   .hero .lead { opacity: 0; animation: rise 1.2s 0.5s var(--ease) forwards; text-shadow: 0 2px 20px #000; }
+  /* the first thing after the headline: this costs nothing and sells nothing */
+  .free { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; margin: 0 0 18px; max-width: 640px; font-size: 18px; color: var(--text); text-shadow: 0 2px 20px #000; opacity: 0; animation: rise 1.2s 0.4s var(--ease) forwards; }
+  .free-mark { flex: none; padding: 7px 14px; border: 1.5px solid var(--red); border-radius: 999px; background: rgba(255, 31, 45, 0.14); color: #fff; font: 700 15px/1 var(--display); letter-spacing: 0.08em; text-transform: uppercase; box-shadow: 0 0 24px var(--red-glow); }
   .ctas { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 26px; }
   .hero .ctas { opacity: 0; animation: rise 1.2s 0.7s var(--ease) forwards; }
   .stats { display: flex; gap: clamp(20px, 4vw, 56px); margin: 44px 0 0; flex-wrap: wrap; opacity: 0; animation: rise 1.2s 0.9s var(--ease) forwards; }
@@ -276,10 +247,11 @@ const features = [
   .flow { margin: 40px 0; }
   .flow svg { width: 100%; height: auto; overflow: visible; }
   .flow rect { fill: #0f1115; stroke: rgba(255,255,255,0.14); }
-  .flow .hot rect { stroke: var(--red); filter: drop-shadow(0 0 18px rgba(255,31,45,0.5)); }
+  .flow .hot rect { stroke: var(--red); }
   .flow text { fill: #fff; font-size: 20px; font-weight: 600; letter-spacing: 0.05em; }
   .flow text.sub { fill: var(--text-3); font-size: 13px; font-weight: 500; }
-  .pulse { fill: #ff4d58; filter: drop-shadow(0 0 6px #ff1f2d); }
+  .pulse circle { fill: #ff4d58; }
+  .pulse circle.halo { fill: url(#pulseglow); }
   .steps b { font: 700 40px/1 var(--display); color: var(--red); display: block; margin-bottom: 10px; }
   .lib-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; margin: 30px 0; }
   .lib-row :global(.lib-card) { border-radius: 16px; overflow: hidden; border: 1px solid var(--line); background: #0c0d10; transition: transform 0.4s var(--ease), box-shadow 0.4s; }
@@ -301,11 +273,10 @@ const features = [
     .hero .stats { display: none; }
     .title { font-size: clamp(44px, 13vw, 64px); }
     .hero .lead { font-size: 16px; }
+    .free { font-size: 15px; } .free-mark { font-size: 13px; }
     .chapter { align-items: flex-end; min-height: 110vh; }
     .panel { max-width: none; padding: 24px; }
-    .hud { bottom: 16px; gap: 20px; }
-    .hud b { font-size: 30px; } .hud .gear b { font-size: 56px; }
-  }
+      }
 </style>
 
 <script src="../scripts/home.ts"></script>

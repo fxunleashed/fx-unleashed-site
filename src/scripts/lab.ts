@@ -69,7 +69,7 @@ if (webglOk()) {
       const b = document.createElement("button"); b.className = "chip"; b.textContent = item.Name;
       b.addEventListener("click", async () => stage.setDash(await (await fetch(url(item.DashUrl))).json()));
       screens.insertBefore(b, screens.firstChild);
-      if (item.Id === "stint") fetch(url(item.DashUrl)).then(r => r.json()).then(d => stage.setDash(d));
+      if (item.Id === "slipstream") fetch(url(item.DashUrl)).then(r => r.json()).then(d => stage.setDash(d));
     }
   });
 

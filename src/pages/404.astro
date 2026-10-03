@@ -11,7 +11,8 @@ import Base from "../layouts/Base.astro";
   </section>
 </Base>
 <style>
-  .stage { position: fixed; inset: 0; z-index: 0; }
+  .stage { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; height: 100lvh; z-index: 0; }
+  /* the largest viewport height: a phone's address bar sliding in and out doesn't resize (and blank) the canvas */
   .stage :global(canvas) { width: 100% !important; height: 100% !important; }
   .msg { position: relative; z-index: 1; min-height: 100vh; display: flex; flex-direction: column; justify-content: flex-end; padding-bottom: 12vh; }
   .ctas { display: flex; gap: 10px; flex-wrap: wrap; }

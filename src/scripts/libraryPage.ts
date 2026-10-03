@@ -13,7 +13,15 @@ let kind = "all";
 const tagsOn = new Set<string>();
 let plugin: PluginState = { available: false };
 const dashCache = new Map<string, Promise<any>>();
-const getDash = (i: LibraryItem) => { const k = i.Kind + i.Id; if (!dashCache.has(k)) dashCache.set(k, fetch(url(i.DashUrl)).then(r => r.json())); return dashCache.get(k)!; };
+const getDash = (i: LibraryItem) => {
+  const k = i.Kind + i.Id;
+  if (!dashCache.has(k)) {
+    const p = fetch(url(i.DashUrl)).then(r => { if (!r.ok) throw new Error(`${i.DashUrl}: ${r.status}`); return r.json(); });
+    p.catch(() => dashCache.delete(k)); // a failed load is tried again next time, not remembered
+    dashCache.set(k, p);
+  }
+  return dashCache.get(k)!;
+};
 
 // one car for every live preview (they all show the same lap)
 const car = new Car();
@@ -107,13 +115,35 @@ async function open(i: LibraryItem) {
   dl.href = url(i.DashUrl); dl.setAttribute("download", `${i.Id}.json`);
   updateInstall();
   if (!dlg.open) dlg.showModal();
-  if (webglOk()) {
-    if (!stage) stage = new Stage($("viewer"), defaultWheel, { shot: "card", intro: false, particles: false });
+  await showWheel(i);
+}
+
+/** The wheel with the item on its screen; if 3D can't start (or the context was lost for good), the item's picture instead. */
+async function showWheel(i: LibraryItem) {
+  const viewer = $("viewer");
+  const still = () => {
+    dropStage();
+    const img = new Image();
+    img.className = "still"; img.alt = i.Name; img.src = url(i.PreviewUrl);
+    viewer.replaceChildren(img);
+  };
+  if (!webglOk()) return still();
+  try {
+    if (stage?.contextLost()) dropStage(); // a lost context blanks the canvas for good: start again with a fresh one
+    if (!stage) { viewer.replaceChildren(); stage = new Stage(viewer, defaultWheel, { shot: "card", intro: false, particles: false }); }
     stage.paused = false;
-    stage.setDash(await getDash(i));
+    const dash = await getDash(i);
+    if (current !== i) return; // another item was opened while this one loaded
+    stage.setDash(dash);
     stage.setShot("card");
+  } catch (e) {
+    console.warn("library viewer:", e);
+    if (current === i && !stage) still();
+    else if (current === i) $("install-note").textContent = "This one didn't load. Close it and try again, or download the file.";
   }
 }
+
+function dropStage() { try { stage?.dispose(); } catch { /* already gone */ } stage = null; }
 
 function updateInstall() {
   const btn = $<HTMLButtonElement>("install"), note = $("install-note"), i = current!;

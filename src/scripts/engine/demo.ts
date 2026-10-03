@@ -184,8 +184,40 @@ export function format(v: unknown, fmt?: string): string {
     case "gear": return n < 0 ? "R" : n === 0 ? "N" : String(n);
     case "int": return String(Math.round(n));
     default: {
-      const m = /^0(\.(0+))?$/.exec(fmt || "0");
-      return m ? n.toFixed(m[2] ? m[2].length : 0) : String(Math.round(n));
+      if (fmt?.startsWith("time:")) return timeSpan(n, fmt.slice(5));
+      return fmt ? numberFormat(n, fmt) : String(Math.round(n));
     }
   }
+}
+
+/** A .NET TimeSpan custom format from seconds (`m\:ss\.f`, `hh\:mm\:ss`): digits are cut, not rounded, as TimeSpan does. */
+function timeSpan(sec: number, fmt: string): string {
+  const neg = sec < 0, t = Math.abs(sec);
+  const h = Math.floor(t / 3600), m = Math.floor((t % 3600) / 60), s = Math.floor(t % 60), frac = t - Math.floor(t);
+  let out = "";
+  for (let i = 0; i < fmt.length;) {
+    const c = fmt[i];
+    if (c === "\\") { out += fmt[i + 1] ?? ""; i += 2; continue; }
+    let k = 1; while (fmt[i + k] === c) k++;
+    const pad = (v: number) => String(v).padStart(k, "0");
+    if (c === "h") out += pad(h); else if (c === "m") out += pad(m); else if (c === "s") out += pad(s);
+    else if (c === "f" || c === "F") out += String(Math.floor(frac * Math.pow(10, k) + 1e-9)).padStart(k, "0");
+    else out += c.repeat(k);
+    i += k;
+  }
+  return (neg ? "-" : "") + out;
+}
+
+/** A .NET custom number format: `0`, `0.00`, `'P'0`, and sections `+0.00;-0.00;0.00` (positive; negative; zero). */
+function numberFormat(n: number, fmt: string): string {
+  const sections = fmt.split(";");
+  let section = sections[0], v = n, sign = "";
+  if (n < 0 && sections.length > 1) { section = sections[1]; v = -n; }
+  else if (n === 0 && sections.length > 2) section = sections[2];
+  else if (n < 0) { sign = "-"; v = -n; }
+  const lit = (s: string) => s.replace(/'([^']*)'/g, "$1").replace(/"([^"]*)"/g, "$1");
+  const m = /0+(\.0+)?/.exec(section);
+  if (!m) return sign + lit(section);
+  const digits = m[1] ? m[1].length - 1 : 0;
+  return sign + lit(section.slice(0, m.index)) + v.toFixed(digits) + lit(section.slice(m.index + m[0].length));
 }

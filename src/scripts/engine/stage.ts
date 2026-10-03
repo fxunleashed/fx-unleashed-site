@@ -10,6 +10,7 @@ import type { Wheel } from "../../data/wheels/index";
 import { buildWheel, type WheelModel } from "./wheel3d";
 import { Car } from "./demo";
 import { LightEngine } from "./lights";
+import { CheapBloom } from "./bloom";
 import { DashRenderer, drawLogoSaver, type Dash } from "./dashRender";
 
 export interface Shot { cam: [number, number, number]; look: [number, number, number]; rot: [number, number, number]; fov?: number }
@@ -19,22 +20,35 @@ export const SHOTS: Record<string, Shot> = {
   hero: { cam: [-1.8, 0.05, 5.9], look: [-1.85, -0.05, 0], rot: [0.06, -0.38, 0.02] },
   heroNarrow: { cam: [0, -1.0, 7.4], look: [0, -1.05, 0], rot: [0.1, -0.2, 0] },
   front: { cam: [0, 0, 5.2], look: [0, 0, 0], rot: [0, 0, 0] },
-  rev: { cam: [-0.55, 1.1, 2.9], look: [-0.62, 0.6, 0], rot: [0.28, 0.08, 0] },       // panel on the left: the bar sits right of it
+  // the light presets: the whole wheel beside the panel (it's on the left), barely turned, so every light shows
+  rev: { cam: [-1.1, 0.05, 6.4], look: [-1.15, 0, 0], rot: [0.05, -0.12, 0] },
+  revNarrow: { cam: [0, -2.0, 7.0], look: [0, -2.0, 0], rot: [0.04, 0, 0] },        // portrait: full width above the card
   screen: { cam: [0.52, 0.48, 2.95], look: [0.58, 0.44, 0], rot: [0.05, -0.08, 0] },    // panel on the right: the screen sits left of it
   controls: { cam: [-0.2, -0.45, 3.3], look: [-0.75, -0.3, 0], rot: [-0.14, 0.3, 0.04] }, // panel on the left
+  // the alerts: the whole wheel beside the panel (it's on the left), turned a little the other way from `rev`, so the rev bar,
+  // the buttons on both sides, the small side lights and the encoders all show
+  alerts: { cam: [-1.1, -0.1, 6.3], look: [-1.15, -0.1, 0], rot: [-0.04, 0.12, 0.01] },
   drive: { cam: [0.55, -0.35, 4.3], look: [0.75, 0.2, 0], rot: [0.12, -0.05, 0] },   // panel on the right
   back: { cam: [-2.4, -0.9, -3.9], look: [0.2, 0.1, 0], rot: [0.05, 0.35, 0] },
+  // portrait: further back so the whole wheel and its quick release fit above the text card
+  backNarrow: { cam: [-2.9, -1.6, -7.4], look: [0, -0.95, 0], rot: [0.05, 0.35, 0] },
   side: { cam: [4.4, 0.6, 2.4], look: [0, 0, 0], rot: [0, -0.1, 0] },
   lab: { cam: [-0.75, 0.05, 5.9], look: [-0.8, 0.02, 0], rot: [0, 0, 0] },
-  labNarrow: { cam: [0, 0.9, 7.2], look: [0, 0.9, 0], rot: [0, 0, 0] },
+  labNarrow: { cam: [0, -1.25, 7.6], look: [0, -1.25, 0], rot: [0, 0, 0] }, // the wheel above the panel, which fills the bottom
   card: { cam: [0, 0.2, 5.0], look: [0, 0.05, 0], rot: [0.05, -0.25, 0] },
+  cardNarrow: { cam: [0, 0.05, 7.0], look: [0, 0, 0], rot: [0.05, -0.25, 0] }, // a box with nothing over it: centred, the whole width
 };
 
+// The finish is kept small: a faint glow round the bright lights and screen (BLOOM is how much of the blurred glow is added
+// back; BLOOM_THRESHOLD how bright a pixel must be to glow) and a touch of colour fringing that grows towards the edges of
+// the picture (ABERRATION, as a fraction of the distance from the centre: about 1.5 px at the edge of a 1000 px canvas).
+const BLOOM = 0.6, BLOOM_THRESHOLD = 0.6, ABERRATION = 0.003;
+
 const FilmShader = {
-  uniforms: { tDiffuse: { value: null }, time: { value: 0 }, vignette: { value: 1.0 }, grain: { value: 0.012 }, aberration: { value: 0 } },
+  uniforms: { tDiffuse: { value: null }, tBloom: { value: null }, bloom: { value: BLOOM }, time: { value: 0 }, vignette: { value: 1.0 }, grain: { value: 0.012 }, aberration: { value: ABERRATION } },
   vertexShader: "varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }",
   fragmentShader: `
-    uniform sampler2D tDiffuse; uniform float time; uniform float vignette; uniform float grain; uniform float aberration;
+    uniform sampler2D tDiffuse; uniform sampler2D tBloom; uniform float bloom; uniform float time; uniform float vignette; uniform float grain; uniform float aberration;
     varying vec2 vUv;
     float rand(vec2 co){ return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453); }
     void main(){
@@ -43,6 +57,7 @@ const FilmShader = {
       float g = texture2D(tDiffuse, vUv).g;
       float b = texture2D(tDiffuse, vUv - d * aberration).b;
       vec3 c = vec3(r, g, b);
+      c += texture2D(tBloom, vUv).rgb * bloom;
       c *= smoothstep(0.95, 0.2, length(d) * vignette);
       c += (rand(vUv * 1000.0 + time) - 0.5) * grain;
       gl_FragColor = vec4(c, 1.0);
@@ -64,6 +79,7 @@ export class Stage {
   camera: THREE.PerspectiveCamera;
   composer: EffectComposer;
   film: ShaderPass;
+  bloom: CheapBloom;
   model: WheelModel;
   car = new Car();
   lights: LightEngine;
@@ -98,8 +114,11 @@ export class Stage {
   private disposeFns: (() => void)[] = [];
 
   constructor(private host: HTMLElement, public wheel: Wheel, private opts: StageOptions = {}) {
-    const low = opts.quality === "low" || matchMedia("(max-width: 700px)").matches;
-    this.renderer = new THREE.WebGLRenderer({ antialias: !low, alpha: !!opts.transparent, powerPreference: "high-performance" });
+    // Phones get the same sharpness as desktops (full resolution up to 2x, multisampled): at 1.25x without
+    // antialiasing the model looked jagged and soft on a 3x screen. Only the particle count drops on small screens.
+    const low = opts.quality === "low";
+    const small = matchMedia("(max-width: 700px)").matches;
+    this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: !!opts.transparent, powerPreference: "high-performance" });
     this.renderer.setPixelRatio(Math.min(devicePixelRatio, low ? 1.25 : 2));
     // AgX rolls highlights off smoothly (ACES clipped bright LEDs and reflections to flat white)
     this.renderer.toneMapping = THREE.AgXToneMapping;
@@ -108,10 +127,16 @@ export class Stage {
     host.appendChild(this.renderer.domElement);
     this.renderer.domElement.classList.add("stage-canvas");
 
-    this.camera = new THREE.PerspectiveCamera(32, 1, 0.1, 80);
-    const pmrem = new THREE.PMREMGenerator(this.renderer);
-    this.scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+    this.camera = new THREE.PerspectiveCamera(32, 1, 0.5, 40); // near 0.5: depth precision for the thin layers (phones)
+    this.makeEnvironment();
     this.scene.environmentIntensity = 0.4; // soft reflections only
+    // Phones drop the WebGL context of a page in the background and give it a new one on return. three.js
+    // re-uploads meshes and textures by itself, but the room light is a texture rendered once: without
+    // rendering it again the wheel came back with only its LEDs lit, the body dark.
+    const canvasEl = this.renderer.domElement;
+    const restored = () => { this.makeEnvironment(); this.resize(); };
+    canvasEl.addEventListener("webglcontextrestored", restored);
+    this.disposeFns.push(() => canvasEl.removeEventListener("webglcontextrestored", restored));
     if (!opts.transparent) this.scene.background = new THREE.Color(0x050608);
     this.scene.fog = new THREE.Fog(0x050608, 9, 22);
 
@@ -132,15 +157,18 @@ export class Stage {
     this.lights = new LightEngine(wheel);
     this.logo.src = "/brand/logo-nobg.png";
 
-    if (opts.particles !== false) this.makeParticles(low ? 250 : 700);
+    if (opts.particles !== false) this.makeParticles(low || small ? 250 : 700);
     this.makeStreaks();
 
-    // post: tone mapping, then a film finish (the LEDs draw their own glow; no bloom pass: it clipped colours to white)
+    // post: tone mapping, a cheap bloom (own colour, no white clipping: see bloom.ts), then the film finish
     const target = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, samples: low ? 0 : 4 });
     this.composer = new EffectComposer(this.renderer, target);
     this.composer.addPass(new RenderPass(this.scene, this.camera));
     this.composer.addPass(new OutputPass());
+    this.bloom = new CheapBloom(BLOOM_THRESHOLD);
+    this.composer.addPass(this.bloom);
     this.film = new ShaderPass(FilmShader);
+    (this.film.uniforms as any).tBloom.value = this.bloom.texture;
     this.composer.addPass(this.film);
 
     this.shot = SHOTS[opts.shot ?? "hero"];
@@ -163,6 +191,15 @@ export class Stage {
     if (opts.interactive !== false) this.bindPointer();
     this.resize();
     this.loop();
+  }
+
+  /** The soft room reflections the materials are lit by (rendered into a texture; again after a context loss). */
+  private makeEnvironment() {
+    const pmrem = new THREE.PMREMGenerator(this.renderer);
+    const old = this.scene.environment;
+    this.scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+    old?.dispose();
+    pmrem.dispose();
   }
 
   private radial(inner: string, outer: string) {
@@ -200,16 +237,20 @@ export class Stage {
 
   private bindPointer() {
     const el = this.renderer.domElement;
-    const move = (e: PointerEvent) => {
+    const at = (e: PointerEvent, v: THREE.Vector2) => {
       const r = el.getBoundingClientRect();
-      this.pointer.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
-      this.hoverLed = this.pick();
+      return v.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+    };
+    const tap = new THREE.Vector2();
+    const move = (e: PointerEvent) => {
+      // The parallax follows a mouse only: a finger landing to scroll the page swung the wheel towards it.
+      if (e.pointerType !== "mouse") return;
+      at(e, this.pointer);
+      this.hoverLed = this.pick(this.pointer);
       el.style.cursor = this.hoverLed >= 0 && this.onLedClick ? "pointer" : "";
     };
     const click = (e: PointerEvent) => {
-      const r = el.getBoundingClientRect();
-      this.pointer.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
-      const i = this.pick();
+      const i = this.pick(at(e, tap)); // picking only: a tap doesn't move the parallax
       if (i >= 0 && this.onLedClick) this.onLedClick(i, e);
     };
     window.addEventListener("pointermove", move, { passive: true });
@@ -217,8 +258,8 @@ export class Stage {
     this.disposeFns.push(() => { window.removeEventListener("pointermove", move); el.removeEventListener("pointerdown", click); });
   }
 
-  private pick() {
-    this.raycaster.setFromCamera(this.pointer, this.camera);
+  private pick(at: THREE.Vector2) {
+    this.raycaster.setFromCamera(at, this.camera);
     const hit = this.raycaster.intersectObjects(this.model.ledMeshes.filter(Boolean), false)[0];
     return hit ? (hit.object.userData.index as number) : -1;
   }
@@ -255,6 +296,8 @@ export class Stage {
     // keep the wheel in frame on narrow screens
     this.camera.fov = w / h < 1 ? 32 / Math.max(0.55, w / h) : 32;
     this.camera.updateProjectionMatrix();
+    // setSize clears the canvas: draw again now, or the next frame shows blank (a flash on a resize)
+    this.composer.render(0);
   }
 
   private drawScreen() {
@@ -324,6 +367,9 @@ export class Stage {
     if (render) this.composer.render(dt);
   }
 
+  /** The browser took the GPU context away and hasn't given it back (the canvas stays blank until it does). */
+  contextLost() { return this.renderer.getContext().isContextLost(); }
+
   dispose() {
     cancelAnimationFrame(this.raf);
     for (const f of this.disposeFns) f();
@@ -334,7 +380,4 @@ export class Stage {
   }
 }
 
-/** WebGL available (else pages show a still picture). */
-export function webglOk() {
-  try { const c = document.createElement("canvas"); return !!(c.getContext("webgl2") || c.getContext("webgl")); } catch { return false; }
-}
+export { webglOk } from "./webgl";

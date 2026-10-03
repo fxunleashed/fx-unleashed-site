@@ -2,11 +2,11 @@
 import Base from "../layouts/Base.astro";
 import { site } from "../config";
 ---
-<Base title="Library" description="Dashes and screensavers for the FX Pro, made by the community. Preview them live, install in a click.">
+<Base title="Library" description="Dashes and screensavers for the FX Pro. Preview them live, install in a click.">
   <section class="wrap head">
-    <p class="eyebrow">Community library</p>
+    <p class="eyebrow">Library</p>
     <h1>The <span class="red">library</span></h1>
-    <p class="lead">Dashes and screensavers made by drivers. Hover to see one run, open it to put it on the wheel, install it in a click. Every item is checked for size, format and scripts before it's listed.</p>
+    <p class="lead">Dashes and screensavers made for the FX Pro. Hover to see one run, open it to put it on the wheel, install it in a click.</p>
     <div class="status" id="plugin-status"><span class="dot"></span><span class="txt">Looking for the plugin on this PC…</span></div>
   </section>
 
@@ -47,7 +47,7 @@ import { site } from "../config";
           <a class="btn" id="download" download>Download .json</a>
         </div>
         <p class="note" id="install-note"></p>
-        <p class="terms">Made by the community, not by FX Unleashed or Simagic. Checked for size, format and no scripts; install at your own risk. <a href="/legal/#library-terms">Library terms</a></p>
+        <p class="terms">Made by FX Unleashed, not by Simagic. Install at your own risk. <a href="/legal/#library-terms">Library terms</a></p>
       </div>
     </div>
   </dialog>
@@ -78,6 +78,7 @@ import { site } from "../config";
   .modal { display: grid; grid-template-columns: 1.35fr 1fr; min-height: 560px; border-radius: 24px; overflow: hidden; border: 1px solid var(--line-2); background: #07080a; box-shadow: 0 50px 120px -30px rgba(255, 31, 45, 0.35); }
   .viewer { position: relative; min-height: 420px; background: radial-gradient(circle at 50% 40%, #1a0508, #050608 70%); }
   .viewer :global(canvas) { position: absolute; inset: 0; width: 100% !important; height: 100% !important; }
+  .viewer :global(img.still) { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
   .info { position: relative; padding: 36px 32px; overflow-y: auto; max-height: 90vh; }
   .close { position: absolute; top: 14px; right: 14px; width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--line-2); background: rgba(255,255,255,0.04); color: #fff; font-size: 22px; cursor: pointer; }
   .info h2 { font-size: 40px; }

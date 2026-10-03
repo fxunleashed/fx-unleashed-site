@@ -29,7 +29,7 @@ for (const size of sizes) {
     await page.goto(base + p, { waitUntil: "networkidle2", timeout: 60000 }).catch(e => errors.push(String(e)));
     await page.evaluate(async () => {
       document.querySelectorAll(".reveal").forEach(e => e.classList.add("in"));
-      for (const el of document.querySelectorAll(".title span, .hero .lead, .hero .ctas, .stats")) { el.style.animation = "none"; el.style.opacity = "1"; el.style.transform = "none"; }
+      for (const el of document.querySelectorAll(".title span, .hero .free, .hero .lead, .hero .ctas, .stats")) { el.style.animation = "none"; el.style.opacity = "1"; el.style.transform = "none"; }
       const s = window.stage;
       if (s?.advance) s.advance(9);
       await new Promise(r => setTimeout(r, 300));

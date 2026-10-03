@@ -68,7 +68,8 @@ export class DashRenderer {
       if (/changed\(\s*\d+\s*,\s*\[BrakeBias\]\s*\)/i.test(cond)) return car.biasAge < 2;
       const v = (car.s as Record<string, unknown>)[cond];
       if (v !== undefined) return !!v && v !== "0";
-      return e.PreviewVisible !== false && !/^ncalc:|^js:/i.test(cond) ? true : false;
+      // a SimHub formula can't be worked out here: show the element as the plugin's own preview does (PreviewVisible)
+      return e.PreviewVisible !== false;
     });
   }
 
@@ -129,7 +130,8 @@ export class DashRenderer {
         case "image": { const img = this.images.get(e.Image ?? ""); if (img?.complete) ctx.drawImage(img, x, y, e.W, e.H); break; }
         case "label": this.text(ctx, e.Text ?? "", e, color); break;
         case "value": {
-          const v = car ? this.value(car, e.Bind) : undefined;
+          let v = car ? this.value(car, e.Bind) : undefined;
+          if (typeof v === "number" && e.Scale) v *= e.Scale;
           let s = car ? format(v, e.Format) : (e.PreviewText ?? (e.Samples?.[0] ?? ""));
           if (car && (s === "" || (e.Format === "laptime" && !v))) s = e.Empty ?? (e.PreviewText && v === undefined ? e.PreviewText : "");
           if (car && v === undefined && e.PreviewText) s = e.PreviewText;

@@ -5,11 +5,11 @@ import { BUILDS, LAYERS } from "../data/firmware";
 const warning = render(byName(legal, "firmware-warning.md")).html;
 const back = render(byName(legal, "back-to-stock.md")).html;
 ---
-<Base title="Firmware" description="How the FX Unleashed wheel app is built and checked, what each build changes, and how to go back to stock.">
+<Base title="Firmware" description="How the FX Unleashed wheel app is built and checked, what each build changes, how you get it, and how to go back to stock.">
   <section class="wrap page">
     <p class="eyebrow">Firmware</p>
     <h1>Built <span class="red">carefully</span>.</h1>
-    <p class="lead">Unleashed mode needs a modified version of the wheel's own app. Here's what it changes, how every build is checked, and how to go back.</p>
+    <p class="lead">Unleashed mode needs a modified version of the wheel's own app. Here's what it changes, how every build is checked, how you get it, and how to go back.</p>
 
     <div class="warning prose" role="note">
       <p class="eyebrow">Read this first</p>
@@ -34,6 +34,17 @@ const back = render(byName(legal, "back-to-stock.md")).html;
           <div><h3>{b.title} <span class="st">{b.status}</span></h3><p>{b.text}</p></div>
         </div>
       ))}
+    </div>
+
+    <h2 class="reveal" id="how">How you get it</h2>
+    <div class="prose reveal">
+      <p>We never hand out Simagic's firmware, patched or not, and nothing here includes the key that protects it. What we publish is only <strong>our changes</strong>: a few bytes of hooks and some code of our own, packed as a <em>patch file</em>, plus a tool that applies it to <strong>your own copy</strong> of the wheel app.</p>
+      <ul>
+        <li>The tool first checks that your copy is Simagic's original (by its checksum). If it isn't, it stops.</li>
+        <li>It writes the patched file next to it and checks the result against the published checksum. If that doesn't match, it stops.</li>
+        <li>You then install it through SimPro, exactly as you would a firmware update, after ticking the risk acknowledgement. Reinstalling the stock app (below) is always one step away.</li>
+      </ul>
+      <p><strong>Status:</strong> the patch files and this guide are being finalised and will be published here and on GitHub with the stable 0.5.0 release. Until then this page is information only, and the plugin works fully in standard mode, which needs no firmware at all.</p>
     </div>
 
     <h2 class="reveal" id="back-to-stock">Back to stock</h2>

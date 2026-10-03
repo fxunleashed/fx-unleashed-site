@@ -34,8 +34,13 @@ Everything wheel-specific (the 3D model, the light lab, the LED map, the wheel p
 2. List it in `src/data/wheels/index.ts`. Its page appears at `/wheels/<id>/`, and it's in the footer and the wheels list.
 3. Set `status` (`supported`, `beta`, `planned`) and the `features` shown on its page.
 
-The 3D model (`src/scripts/engine/wheel3d.ts`) extrudes the outline, adds grips on the outer 12%, the bezel and screen,
-and the LEDs by group (rev and side lights as lenses, buttons as caps with a ring, encoders as knurled knobs with a ring).
+The 3D model (`src/scripts/engine/wheel3d.ts`) is built the way the wheel is: a thin carbon faceplate (the outline with
+its `windows` cut through), the button `pods` on it, rubber `grips`, the screen frame and screen, the knobs coming up
+through their windows from the electronics `housing` behind (each encoder's light runs round its window, with its label
+lit in the window's tab), carbon `paddles` behind the plate, `rollers`, the `funky` switch, `screws`, and the quick
+release half (`qr`) on the back. Every part is optional; a wheel without them still gets a plate, screen and lights.
+For the FX Pro, `scripts/fxpro_geometry.py` writes those keys (the outline and windows from the plugin's drawing, the
+rest measured on the same reference); `node scripts/wheel-shots.mjs` renders the wheel alone from several angles.
 
 ## How the 3D works
 
@@ -44,13 +49,23 @@ and the LEDs by group (rev and side lights as lenses, buttons as caps with a rin
   parallax, the build-in intro, LED picking. Portrait screens get each shot re-framed automatically.
 - `demo.ts`: the car simulation (demo lap, or driven by the visitor). `lights.ts`: the light presets and effects.
 - `dashRender.ts`: renders the plugin's real dash files (`dash.json`) on a canvas, which becomes the wheel's screen.
-- `audio.ts`: the synthesised engine for "Drive it" (off until clicked).
 - Pages without WebGL show a still picture; `prefers-reduced-motion` skips the intro.
 - `window.stage.advance(seconds)` runs the stage forward at once (used by `npm run shots`).
 
 ## Deploying
 
-`.github/workflows/deploy.yml` builds and publishes to GitHub Pages on a push to `main` (the repo must enable Pages,
-source "GitHub Actions"). In CI the sibling repos aren't there, so the committed copies in `src/content/` and
-`public/library/` are used: run `npm run sync` locally and commit after the docs change. Custom domain: add
-`public/CNAME` with `fxunleashed.com`.
+fxunleashed.com is served by **Firebase Hosting** (project `fx-unleashed`, config in `firebase.json` and `.firebaserc`):
+
+```
+npm run build && firebase deploy --only hosting
+```
+
+Hashed `/_astro/` files are cached for a year; everything else (pages, `library/index.json`, images) is revalidated on
+every visit, so a deploy shows up straight away. Hosting keeps its release history, so the Firebase console can roll a
+bad deploy back in one click. The domain's DNS is at the registrar (A record and a TXT record Firebase gives, a CNAME
+for `www`).
+
+`.github/workflows/build.yml` only checks that the site builds on every push and pull request. In CI the sibling repos
+aren't there, so the committed copies in `src/content/` and `public/library/` are used: run `npm run sync` locally and
+commit after the plugin's docs or the library change. The live library is read from the library repo at runtime
+(`site.libraryBase` in `src/config.ts`), with the copy in `public/library/` as a fallback.

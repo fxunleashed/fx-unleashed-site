@@ -1,16 +1,21 @@
-// The home page: the live wheel behind six scroll chapters, and everything you can do to it.
+// The home page: the live wheel behind the scroll chapters, with its lights, dashes and alerts to try.
 import { webglOk } from "./engine/webgl";
 import type { Stage as StageT } from "./engine/stage";
 import { defaultWheel } from "../data/wheels/index";
 import { PRESETS, hex, type RGB } from "./engine/lights";
-import { EngineSound } from "./engine/audio";
 import { loadIndex, url, type LibraryItem } from "./library";
 
 const host = document.getElementById("stage")!;
 const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 const boot = document.getElementById("boot");
-const unboot = () => boot?.classList.add("gone");
+let unbooted = false;
+const unboot = () => {
+  if (unbooted) return;
+  unbooted = true;
+  boot?.classList.add("gone");
+  setTimeout(() => boot?.remove(), 1200); // after its fade: hidden, it still ran its animations (13 dots, a filtered logo) every frame
+};
 setTimeout(unboot, 2500); // never hold the page for the 3D
 
 // the stats count up when they first show
@@ -28,14 +33,11 @@ else (async () => {
   host.classList.add("live");
   (window as any).stage = stage;
   const car = stage.car;
-  const sound = new EngineSound();
   const forced: Record<string, boolean> = {};
-  let revving = false, driving = false;
 
   // ---------- scroll: blend the camera between the chapters' shots ----------
   const chapters = [...document.querySelectorAll<HTMLElement>(".chapter")];
   const solid = document.querySelector<HTMLElement>(".after-film");
-  let current = "hero";
   function onScroll() {
     const mid = scrollY + innerHeight * 0.5;
     const tops = chapters.map(c => c.offsetTop + c.offsetHeight * 0.5);
@@ -44,9 +46,6 @@ else (async () => {
     if (i === 0) stage.setShot(chapters[0].dataset.shot!);
     else if (i >= tops.length) stage.setShot(chapters[tops.length - 1].dataset.shot!);
     else stage.blendShots(chapters[i - 1].dataset.shot!, chapters[i].dataset.shot!, (mid - tops[i - 1]) / (tops[i] - tops[i - 1]));
-    const near = chapters.reduce((a, c, k) => (Math.abs(tops[k] - mid) < Math.abs(tops[chapters.indexOf(a)] - mid) ? c : a), chapters[0]);
-    const shot = near?.dataset.shot ?? "hero";
-    if (shot !== current) { current = shot; setDriving(shot === "drive"); }
     // fade the stage out under the solid sections
     const fade = solid ? Math.max(0, Math.min(1, (scrollY + innerHeight - solid.offsetTop - 200) / (innerHeight * 0.6))) : 0;
     host.style.opacity = String(1 - fade * 0.92);
@@ -61,18 +60,6 @@ else (async () => {
     stage.lights.painted.clear();
     document.querySelectorAll("#presets [data-preset]").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
   }));
-
-  // ---------- rev: hold the button or Space ----------
-  const revBtn = document.getElementById("rev-btn")!;
-  const rev = (on: boolean) => {
-    if (driving) return;
-    revving = on;
-    car.mode = on ? "manual" : "auto";
-    car.input.throttle = on ? 1 : 0;
-    car.input.brake = 0;
-  };
-  revBtn.addEventListener("pointerdown", e => { e.preventDefault(); rev(true); });
-  addEventListener("pointerup", () => revving && rev(false));
 
   // ---------- paint: click a light ----------
   const palette = ["#ff1f2d", "#ffb000", "#21e07a", "#22d3ee", "#2f6bff", "#b07cff", "#ff2bd6", "#ffffff"];
@@ -91,72 +78,8 @@ else (async () => {
     b.setAttribute("aria-pressed", String(forced[k]));
   }));
   document.getElementById("bias-btn")!.addEventListener("click", () => car.setBias(car.s.brakeBias + (Math.random() < 0.5 ? -0.5 : 0.5)));
-  // in the hero, sweeping the pointer across the page revs the wheel (the rev bar follows it)
-  let pointerX = -1, pointerAt = 0;
-  addEventListener("pointermove", e => { pointerX = e.clientX / innerWidth; pointerAt = performance.now(); }, { passive: true });
   stage.onStep = () => {
     for (const [k, v] of Object.entries(forced)) if (v) (car.s as any)[k] = true;
-    if (current === "hero" && !revving && performance.now() - pointerAt < 1800 && pointerX >= 0) {
-      const pct = 45 + pointerX * 57; // left = idle, right = past the shift point
-      car.s.rpmPercent = Math.min(100, pct); car.s.rpm = (car.s.rpmPercent / 100) * car.s.maxRpm;
-      car.s.shift = car.s.rpmPercent >= stage.lights.shiftPct; car.s.limiter = car.s.rpmPercent >= 99.5;
-    }
-  };
-
-  // ---------- drive ----------
-  const hud = document.getElementById("hud")!;
-  const hs = document.getElementById("hud-speed")!, hg = document.getElementById("hud-gear")!, hr = document.getElementById("hud-rpm")!;
-  function setDriving(on: boolean) {
-    driving = on;
-    car.mode = on ? "manual" : revving ? "manual" : "auto";
-    if (!on) { car.input.throttle = 0; car.input.brake = 0; }
-    stage.speedLines = on ? 1 : 0;
-    hud.classList.toggle("on", on);
-  }
-  const keys = new Set<string>();
-  addEventListener("keydown", e => {
-    if ((e.target as HTMLElement)?.closest?.("input, textarea")) return;
-    if (e.code === "Space" && current === "rev") { e.preventDefault(); if (!revving) rev(true); return; }
-    if (!driving) return;
-    if (["KeyW", "ArrowUp", "KeyS", "ArrowDown", "KeyE", "KeyQ", "Space"].includes(e.code)) e.preventDefault();
-    if (e.repeat) return;
-    keys.add(e.code);
-    if (e.code === "KeyE") car.shiftUp();
-    if (e.code === "KeyQ") car.shiftDown();
-  });
-  addEventListener("keyup", e => {
-    keys.delete(e.code);
-    if (e.code === "Space" && revving) rev(false);
-  });
-  const hold = (id: string, set: (v: boolean) => void) => {
-    const el = document.getElementById(id)!;
-    el.addEventListener("pointerdown", e => { e.preventDefault(); el.setPointerCapture(e.pointerId); set(true); });
-    el.addEventListener("pointerup", () => set(false));
-    el.addEventListener("pointercancel", () => set(false));
-  };
-  const pad = { gas: false, brake: false };
-  hold("gas-btn", v => (pad.gas = v));
-  hold("brake-btn", v => (pad.brake = v));
-  document.getElementById("up-btn")!.addEventListener("click", () => car.shiftUp());
-  document.getElementById("down-btn")!.addEventListener("click", () => car.shiftDown());
-  const soundBtn = document.getElementById("sound-btn")!;
-  soundBtn.addEventListener("click", () => {
-    if (sound.on) sound.stop(); else sound.start();
-    soundBtn.setAttribute("aria-pressed", String(sound.on));
-  });
-
-  stage.onFrame = () => {
-    if (driving) {
-      car.input.throttle = keys.has("KeyW") || keys.has("ArrowUp") || pad.gas ? 1 : 0;
-      car.input.brake = keys.has("KeyS") || keys.has("ArrowDown") || pad.brake ? 1 : 0;
-      // automatic upshift at the limiter if the visitor doesn't use the paddles
-      if (car.s.limiter && car.input.throttle && car.s.gear < 6) car.shiftUp();
-      if (car.s.rpm < 2600 && car.s.gear > 1) car.shiftDown();
-      hs.textContent = String(Math.round(car.s.speed));
-      hg.textContent = car.s.gearText;
-      hr.textContent = String(Math.round(car.s.rpm / 10) * 10);
-    }
-    sound.update(car.s.rpm, car.s.throttle, car.s.limiter);
   };
 
   onScroll(); // after everything it uses exists
