@@ -7,7 +7,7 @@ import { site } from "../config";
     <p class="eyebrow">Library</p>
     <h1>The <span class="red">library</span></h1>
     <p class="lead">Dashes and screensavers made for the FX Pro. Hover to see one run, open it to put it on the wheel, install it in a click.</p>
-    <div class="status" id="plugin-status"><span class="dot"></span><span class="txt">Looking for the plugin on this PC…</span></div>
+    <div class="status" id="plugin-status"><span class="dot"></span><span class="txt"></span><button class="btn small" id="connect" type="button" hidden>Connect to the plugin</button></div>
   </section>
 
   <section class="wrap controls" aria-label="Filter">
@@ -58,6 +58,7 @@ import { site } from "../config";
 <style>
   .head { padding: 150px 0 20px; position: relative; z-index: 1; }
   .status { display: inline-flex; align-items: center; gap: 10px; margin-top: 10px; padding: 10px 16px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel-solid); font-size: 13px; color: var(--text-2); }
+  .status .btn { margin-left: 4px; }
   .status .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--text-3); }
   .status.ok .dot { background: var(--green); box-shadow: 0 0 10px var(--green); }
   .status.no .dot { background: var(--amber); }

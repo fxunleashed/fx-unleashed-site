@@ -29,8 +29,9 @@ export const url = (rel: string) => base + rel;
 export type PluginState = { available: boolean; version?: string; installed?: { id: string; kind: string; version: string }[]; blocked?: boolean };
 
 /**
- * Asks the plugin on this PC (its local server) whether it's there. Browsers may ask the visitor for permission to
- * reach the local network (Chrome's "local network access"); the plugin answers only this site.
+ * Asks the plugin on this PC (its local server) whether it's there. Only call this when the visitor has asked for it (a
+ * button): browsers ask the visitor for permission to reach apps on their device (Chrome's "local network access") the
+ * first time a page tries, and a page that does it on load looks like it is snooping. The plugin answers only this site.
  */
 export async function pluginState(): Promise<PluginState> {
   const root = `http://127.0.0.1:${site.pluginPort}/api/library/`;

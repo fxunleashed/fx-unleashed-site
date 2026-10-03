@@ -12,6 +12,9 @@ let items: LibraryItem[] = [];
 let kind = "all";
 const tagsOn = new Set<string>();
 let plugin: PluginState = { available: false };
+let probed = false;
+/** A phone or tablet: the plugin runs on a PC, so there is nothing to look for and the browser must never be asked. */
+const mobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) || (navigator as any).userAgentData?.mobile === true;
 const dashCache = new Map<string, Promise<any>>();
 const getDash = (i: LibraryItem) => {
   const k = i.Kind + i.Id;
@@ -149,14 +152,47 @@ function dropStage() { try { stage?.dispose(); } catch { /* already gone */ } st
 function updateInstall() {
   const btn = $<HTMLButtonElement>("install"), note = $("install-note"), i = current!;
   const inst = plugin.installed?.find(x => x.id === i.Id && x.kind === i.Kind);
-  btn.disabled = !plugin.available;
+  if (mobile) {
+    btn.hidden = true;
+    note.textContent = "Installing needs the FX Unleashed plugin on your PC. Copy the link to open this page there, or download the file.";
+    return;
+  }
+  btn.hidden = false;
+  btn.disabled = probed && !plugin.available;
   btn.textContent = inst ? (inst.version === i.Version ? "Installed ✓" : `Update to v${i.Version}`) : "Install in the plugin";
-  note.textContent = plugin.available ? "The plugin asks you to confirm, then it's on the wheel: no restart."
-    : "Install needs FX Unleashed running in SimHub on this PC (your browser may ask to allow access to local devices). Or download the file and drop it on the plugin's Dashes tab (or use Import a file).";
+  note.textContent = !probed ? "Pressing Install looks for the plugin on this PC (your browser may ask to allow it). The plugin then asks you to confirm."
+    : plugin.available ? "The plugin asks you to confirm, then it's on the wheel: no restart."
+    : "The plugin wasn't found. It needs FX Unleashed running in SimHub on this PC. Or download the file and drop it on the plugin's Dashes tab (or use Import a file).";
 }
+
+/** Looks for the plugin on this PC. Only ever runs because the visitor pressed a button. */
+async function connect() {
+  const txt = $("plugin-status").querySelector(".txt")!;
+  txt.textContent = "Looking for the plugin on this PC…";
+  plugin = await pluginState();
+  probed = true;
+  showStatus();
+  render();
+  if (current) updateInstall();
+}
+
+function showStatus() {
+  const st = $("plugin-status"), txt = st.querySelector(".txt")!, btn = $<HTMLButtonElement>("connect");
+  st.classList.toggle("ok", plugin.available);
+  st.classList.toggle("no", probed && !plugin.available);
+  if (mobile) { txt.textContent = "Browse, copy a link or download. Installing needs the FX Unleashed plugin on a PC."; btn.hidden = true; return; }
+  btn.hidden = probed && plugin.available;
+  btn.textContent = probed ? "Try again" : "Connect to the plugin";
+  txt.textContent = !probed ? "Install buttons work with the plugin on this PC. Nothing is contacted until you press Install or Connect."
+    : plugin.available ? `FX Unleashed v${plugin.version} found on this PC: installs go straight to your wheel.`
+    : "The plugin isn't running on this PC: you can still download items.";
+}
+$("connect").addEventListener("click", () => { void connect(); });
 
 $("install").addEventListener("click", async () => {
   const i = current!, note = $("install-note");
+  if (!probed) { note.textContent = "Looking for the plugin on this PC…"; await connect(); }
+  if (!plugin.available) { updateInstall(); return; }
   note.textContent = "Confirm in the plugin (SimHub)…";
   try {
     const r = await installInPlugin(i);
@@ -185,11 +221,8 @@ document.querySelectorAll<HTMLButtonElement>("#kind button").forEach(b => b.addE
 [q, game, sort].forEach(x => x.addEventListener("input", render));
 
 (async () => {
-  const [index, p] = await Promise.all([loadIndex(), pluginState()]);
-  plugin = p;
-  const st = $("plugin-status");
-  st.classList.add(p.available ? "ok" : "no");
-  st.querySelector(".txt")!.textContent = p.available ? `FX Unleashed v${p.version} found on this PC: installs go straight to your wheel.` : "The plugin isn't running on this PC: you can still download items.";
+  const index = await loadIndex();
+  showStatus(); // no plugin lookup here: that happens only when the visitor presses Connect or Install
   items = index.Items;
   for (const g of [...new Set(items.flatMap(i => i.Games ?? []))].sort()) game.add(new Option(g, g));
   tags();
