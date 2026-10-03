@@ -22,16 +22,20 @@ preview, an **Install in the plugin** button and a download.
 
 ## Submit it to the library
 
+A **dash** is shown on the wheel while you race; a **screensaver** is shown between sessions. The library keeps them apart (the
+[library page](/library/) has a tab for each), and the plugin and the form both ask which one yours is.
+
 For everyone to use. You need to have made it, or have its author's permission. You also need a **free GitHub account**: the
 submit form is a GitHub page, and that's the only thing to sign up for (nothing to install, no Git).
 
 1. **Make it** in the plugin's [designer](/docs/dash-designer/) (Dashes tab, *Edit in the designer*) until its checks show no
    warnings: no flashing, text that fits, low USB traffic.
-2. **Package it:** Dashes tab, pick your dash, **Package for the library**. Fill in the name, games, tags, licence and
-   version, and tick that it's yours. It writes a file called `<id>.fxdash.zip`, shows it in Explorer and offers to open the
+2. **Package it.** A dash: Dashes tab, pick your dash, **Package for the library**. A screensaver: Idle & sleep tab, **Share...** on
+   its tile (a picture you added, or a dash you use as a screensaver). In the dialog check **What is it?**, then fill in the
+   name, games, tags, licence and version, and tick that it's yours. It writes a file called `<id>.fxdash.zip`, shows it in Explorer and offers to open the
    submit form.
 3. **Submit it:** on the [Submit a dash](https://github.com/fxunleashed/fx-unleashed-library/issues/new?template=submit-dash.yml)
-   form (sign in to GitHub if it asks), add the `.zip` to the **Package** box: drag it in from Explorer, or click **selecting
+   form (sign in to GitHub if it asks), pick **A dash** or **A screensaver**, then add the `.zip` to the **Package** box: drag it in from Explorer, or click **selecting
    them** under the box and pick the file. Tick the three boxes and press **Submit new issue**.
 4. **A bot checks it** (format, size, no scripts, the preview, the checksum). If everything passes it's **published on the spot**:
    the form closes with a link, and it's in the library and the plugin a few minutes later, credited to you. If something's

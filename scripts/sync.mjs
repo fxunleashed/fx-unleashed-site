@@ -20,13 +20,15 @@ function copy(from, to) {
 let n = 0;
 if (fs.existsSync(plugin)) {
   // usb-mode.md stays off the site: it is the developer reference, not a user guide
-  const docs = ["setup.md", "dash-format.md", "dash-designer.md"];
+  const docs = ["setup.md", "dash-format.md", "dash-designer.md", "lights.md"];
   for (const f of docs) if (fs.existsSync(path.join(plugin, "docs", f))) { copy(path.join(plugin, "docs", f), path.join(root, "src/content/docs", f)); n++; }
   for (const f of fs.readdirSync(path.join(plugin, "docs/legal")).filter(f => f.endsWith(".md") && f !== "README.md")) {
     copy(path.join(plugin, "docs/legal", f), path.join(root, "src/content/legal", f)); n++;
   }
   for (const f of fs.readdirSync(path.join(plugin, "assets/brand"))) { copy(path.join(plugin, "assets/brand", f), path.join(root, "public/brand", f)); n++; }
   copy(path.join(plugin, "assets/logo-nobg.png"), path.join(root, "public/brand/logo-nobg.png")); n++;
+  // the ATSR-Hub layout for the FX Pro (docs/lights.md links it)
+  copy(path.join(plugin, "assets/Simagic_FX-Pro.atsrdevice"), path.join(root, "public/downloads/Simagic_FX-Pro.atsrdevice")); n++;
 } else console.log("sync: plugin repo not found at " + plugin + " (using committed copies)");
 
 if (fs.existsSync(path.join(library, "index.json"))) {
