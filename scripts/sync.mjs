@@ -2,6 +2,7 @@
 //   plugin repo  docs/*.md, docs/legal/*.md, assets/brand/*          -> src/content/..., public/brand/
 //   library repo index.json + every item's preview.png and dash.json -> public/library/ (offline copy; the live
 //                                                                       library is read from GitHub at runtime)
+// (src/content/docs/library-submit.md is written for this site and is not synced)
 // Paths default to sibling folders; override with FXU_PLUGIN_REPO / FXU_LIBRARY_REPO. Missing repos are skipped (the
 // committed copies are used), so the site builds on its own too (CI).
 import fs from "node:fs";
@@ -30,7 +31,6 @@ if (fs.existsSync(plugin)) {
 
 if (fs.existsSync(path.join(library, "index.json"))) {
   copy(path.join(library, "index.json"), path.join(root, "public/library/index.json")); n++;
-  copy(path.join(library, "CONTRIBUTING.md"), path.join(root, "src/content/docs/library-submit.md")); n++;
   for (const kind of ["dashes", "savers"]) {
     const dir = path.join(library, kind);
     if (!fs.existsSync(dir)) continue;

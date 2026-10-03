@@ -2,9 +2,9 @@
 import Base from "../layouts/Base.astro";
 import { FAQ } from "../data/faq";
 import { site } from "../config";
-const link = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
+const link = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>").replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
 const tags = [...new Set(FAQ.map(f => f.tag ?? "Other"))];
-const schema = { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: FAQ.map(f => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a.replace(/\[([^\]]+)\]\([^)]+\)/g, "$1") } })) };
+const schema = { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: FAQ.map(f => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a.replace(/\*\*/g, "").replace(/\[([^\]]+)\]\([^)]+\)/g, "$1") } })) };
 ---
 <Base title="FAQ" description="Questions about FX Unleashed, answered short.">
   <script type="application/ld+json" slot="head" set:html={JSON.stringify(schema)} />

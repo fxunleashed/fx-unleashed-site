@@ -1,5 +1,5 @@
 {
- "$comment": "One supported wheel. Add another wheel by adding a file like this one and listing it in index.ts. Coordinates: the front view, in the units of `size` (x right, y down). PREVIEW BRANCH: the outline is the plugin's assets/fxpro-outline.svg, traced from Simagic's product photo; not for publishing before the rights check (O2). The pods, grips, paddles, rollers and screws were measured on the same picture (scripts/fxpro_geometry.py); the quick release is modelled from Simagic's QR half as sold separately (no logo).",
+ "$comment": "One supported wheel. Add another wheel by adding a file like this one and listing it in index.ts. Coordinates: the front view, in the units of `size` (x right, y down).",
  "id": "fx-pro",
  "name": "FX Pro",
  "maker": "Simagic",
@@ -1985,7 +1985,7 @@
  "features": [
   {
    "title": "Every light, any colour",
-   "text": "All 38 LEDs: rev bar, side lights, button caps and encoder rings, 60 times a second."
+   "text": "All 38 LEDs: rev bar, side lights, button caps and encoder rings, 30 times a second."
   },
   {
    "title": "Your own dashes",

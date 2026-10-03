@@ -3,19 +3,19 @@ import Base from "../layouts/Base.astro";
 import DocPage from "../components/DocPage.astro";
 import { render, docs, byName } from "../lib/md";
 // The guide is docs/setup.md in the plugin repo (npm run sync copies it): edit it there.
-const md = byName(docs, "setup.md").replace(/^﻿?\s*# [^\n]*\n/, "");
+const md = byName(docs, "setup.md").replace(/^﻿?\s*# [^\n]*\n/, "").replace(/^Three steps:[\s\S]*?\n\n/m, ""); // the lead above says it already
 const { html, toc } = render(md);
 ---
-<Base title="Get started" description="Set up FX Unleashed from start to finish: install, firmware, wiring, game controls, dashes, lights.">
+<Base title="Get started" description="Three steps to your own dashes and lights on the Simagic FX Pro: the wheel app, the plugin, and picture memory for the screen.">
   <DocPage html={html} toc={toc}>
     <Fragment slot="before">
       <h1>Get started</h1>
-      <p class="lead">From nothing to your own dashes and lights, one step at a time. Every step says what you should see, and what to do if you don't.</p>
+      <p class="lead">Three steps and you're driving: the wheel app, the plugin, and (optional, but highly recommended) picture memory for the screen. Every step says what you should see.</p>
       <div class="quick">
-        <a class="q" href="#2-install-the-plugin"><b>1</b><span>Install the plugin</span></a>
-        <a class="q" href="#3-before-you-flash-the-risks"><b>2</b><span>Firmware</span></a>
-        <a class="q" href="#4-wiring-and-power"><b>3</b><span>Wiring</span></a>
-        <a class="q" href="#6-turn-on-unleashed-mode"><b>4</b><span>Unleash it</span></a>
+        <a class="q" href="#1-install-the-wheel-app"><b>1</b><span>Wheel app<small>~10 min</small></span></a>
+        <a class="q" href="#2-install-the-plugin"><b>2</b><span>Plugin<small>~2 min</small></span></a>
+        <a class="q hl" href="#3-turn-on-picture-memory"><b>3</b><span>Picture memory<small>Optional · highly recommended</small></span></a>
+        <a class="q" href="#4-pick-your-dashes-and-lights"><b>4</b><span>Dashes and lights<small>Make it yours</small></span></a>
       </div>
     </Fragment>
   </DocPage>
@@ -26,4 +26,7 @@ const { html, toc } = render(md);
   .q:hover { border-color: var(--red) !important; transform: translateY(-2px); }
   .q b { font: 700 28px/1 var(--display); color: var(--red); }
   .q span { font: 600 14px/1.2 var(--display); color: #fff; letter-spacing: 0.04em; }
+  .q small { display: block; margin-top: 4px; font: 500 11px/1.3 var(--body, inherit); color: var(--text-3); letter-spacing: 0.02em; }
+  .q.hl { border-color: rgba(255, 31, 45, 0.5); background: linear-gradient(180deg, rgba(255,31,45,0.08), var(--panel-solid)); }
+  .q.hl small { color: var(--red); }
 </style>

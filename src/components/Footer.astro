@@ -13,7 +13,7 @@ const year = new Date().getFullYear();
       <div class="cols">
         <div><h4>Site</h4>{nav.map(n => <a href={n.href}>{n.label}</a>)}</div>
         <div><h4>Wheels</h4>{wheels.map(w => <a href={`/wheels/${w.id}/`}>{w.maker} {w.name}</a>)}<a href="/wheels/">All wheels</a></div>
-        <div><h4>Project</h4><a href={site.releasesPage}>Download</a><a href={site.github}>GitHub</a><a href={`https://github.com/${site.libraryRepo}`}>Library repo</a><a href="/legal/">Legal and licences</a><a href="/legal/#privacy">Privacy</a><a href={site.contact}>Contact</a></div>
+        <div><h4>Project</h4><a href={site.releasesPage}>Plugin download</a><a href={site.firmwareReleases}>Wheel app download</a><a href="/docs/library-submit/">Submit a dash</a><a href={site.github}>GitHub</a><a href={`https://github.com/${site.libraryRepo}`}>Library repo</a><a href="/legal/">Legal and licences</a><a href="/legal/#privacy">Privacy</a><a href={site.contact}>Contact</a></div>
       </div>
     </div>
     <p class="disclaimer">{disclaimer}</p>

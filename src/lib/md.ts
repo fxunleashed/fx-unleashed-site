@@ -32,6 +32,8 @@ export function render(md: string): { html: string; toc: TocEntry[]; title: stri
       link({ href, title: t, tokens }) {
         const text = this.parser.parseInline(tokens);
         let h = href ?? "";
+        // the guide is also read on GitHub, where links to this site are absolute: keep them in the same tab here
+        h = h.replace(/^https:\/\/(www\.)?fxunleashed\.com(?=\/|$)/, "") || "/";
         const file = h.split("#")[0].split("/").pop() ?? "";
         if (DOC_PAGES[file]) h = DOC_PAGES[file] + (h.includes("#") ? "#" + h.split("#")[1] : "");
         // other plugin docs aren't pages here: link them on GitHub

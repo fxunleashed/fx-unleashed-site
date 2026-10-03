@@ -7,12 +7,12 @@ import Icon from "../components/Icon.astro";
 const w = defaultWheel;
 const features = [
   { icon: "library", title: "Ready-made dashes", text: "Dashes and screensavers made for the screen. Preview them live, install in a click, no restart.", href: "/library/" },
-  { icon: "designer", title: "Dash designer", text: "Draw your own dash in the browser, see it on the wheel as you edit, check it can't flicker or lag.", href: "/docs/dash-designer/" },
-  { icon: "mirror", title: "Screen mirror", text: "An OBS browser source with your wheel's screen and lights, live. Nobody else can show this wheel on stream.", href: "/start/#7-dashes" },
-  { icon: "device", title: "SimHub LED device", text: "Your wheel shows up in SimHub's Devices: any SimHub LED profile, or ATSR-Hub, drives all 38 lights.", href: "/start/#8-lights" },
-  { icon: "car", title: "Per car, per game", text: "Dashes, light presets, even your base's rotation and force follow the car you drive.", href: "/start/" },
+  { icon: "designer", title: "Dash designer", text: "Draw your own in the browser and see it on the wheel as you edit, with checks that it can't flicker or lag.", href: "/docs/dash-designer/" },
+  { icon: "share", title: "Share and submit", text: "Send a dash to a friend as one file, or submit it to the library: if it passes the checks, it's published on the spot.", href: "/docs/library-submit/" },
+  { icon: "mirror", title: "Screen mirror", text: "An OBS browser source with your wheel's screen and lights, live.", href: "/start/#4-pick-your-dashes-and-lights" },
+  { icon: "device", title: "SimHub LED device", text: "Your wheel shows up in SimHub's Devices: any SimHub LED profile, or ATSR-Hub, drives all 38 lights.", href: "/start/#4-pick-your-dashes-and-lights" },
+  { icon: "car", title: "Per car, per game", text: "Dashes, light presets, even your base's rotation and force follow the car you drive.", href: "/start/#4-pick-your-dashes-and-lights" },
   { icon: "flag", title: "Alerts that matter", text: "Flags, spotter, pit limiter, ABS and TC, low fuel, custom alerts from any SimHub value, in your order.", href: "/lab/" },
-  { icon: "moon", title: "Night mode", text: "A ceiling for every light and a dimmer screen, on a schedule or with ATSR-Hub's night mode.", href: "/start/#8-lights" },
   { icon: "update", title: "Updates itself", text: "One click installs a new version, one click rolls it back. Your settings come with you.", href: "/changelog/" },
 ];
 ---
@@ -36,7 +36,7 @@ const features = [
       </div>
       <dl class="stats">
         <div><dt data-count={w.leds.length}>{w.leds.length}</dt><dd>lights, any colour</dd></div>
-        <div><dt data-count="60">60</dt><dd>light frames a second</dd></div>
+        <div><dt data-count="30">30</dt><dd>light frames a second</dd></div>
         <div><dt>1-click</dt><dd>dash installs</dd></div>
       </dl>
     </div>
@@ -48,7 +48,7 @@ const features = [
     <div class="wrap"><div class="panel glass left reveal">
       <p class="eyebrow">01 · Lights</p>
       <h2>Every light.<br />Any colour.</h2>
-      <p>Rev bar, side lights, button caps, encoder rings: {w.leds.length} LEDs, each its own colour, 60 times a second. Shift lights follow each car's real data.</p>
+      <p>Rev bar, side lights, button caps, encoder rings: {w.leds.length} LEDs, each its own colour, 30 times a second. Shift lights follow each car's real data.</p>
       <div class="chips" id="presets">
         {PRESETS.map((p, i) => <button class="chip" data-preset={p.id} aria-pressed={i === 0 ? "true" : "false"}><span class="dot" style={`background:${p.swatch};color:${p.accent}`}></span>{p.name}</button>)}
       </div>
@@ -147,11 +147,13 @@ const features = [
             </g>
           </svg>
         </div>
+        <h3 class="reveal getting">Get going in three steps</h3>
         <div class="grid three steps">
-          <div class="card reveal"><b>1</b><h3>Install the plugin</h3><p>Drop one file into SimHub. It updates itself after that.</p></div>
-          <div class="card reveal"><b>2</b><h3>Flash the wheel app</h3><p>Once, through SimPro's own firmware page. Back to stock any time.</p></div>
-          <div class="card reveal"><b>3</b><h3>Plug in and drive</h3><p>The USB cable goes to the PC. Start a game: your dash and lights take over.</p></div>
+          <a class="card reveal" href="/start/#1-install-the-wheel-app"><b>1</b><h3>Install the wheel app</h3><p>One modified wheel app, installed through SimPro's own firmware page. Back to stock any time.</p></a>
+          <a class="card reveal" href="/start/#2-install-the-plugin"><b>2</b><h3>Install the plugin</h3><p>Drop one file into SimHub, plug in the wheel's USB cable and press Unleashed. It updates itself after that.</p></a>
+          <a class="card reveal hl" href="/start/#3-turn-on-picture-memory"><b>3</b><h3>Picture memory</h3><p><span class="opt">Optional · highly recommended.</span> Full-colour dashes that appear at once: about a minute of guided steps.</p></a>
         </div>
+        <p class="muted small reveal">Only want each car's rev lights and dash matched? Step 2 alone gives you standard mode.</p>
       </div>
     </section>
 
@@ -160,9 +162,9 @@ const features = [
       <div class="wrap">
         <p class="eyebrow reveal">Library</p>
         <h2 class="reveal">Dashes and screensavers</h2>
-        <p class="lead reveal">Made for the FX Pro's screen: see each one running, then install it from here or from the plugin.</p>
+        <p class="lead reveal">Made for the FX Pro's screen: see each one running, then install it from here or from the plugin. Made your own? Submit it: if it passes the checks, it's published on the spot.</p>
         <div class="lib-row" id="lib-row"></div>
-        <a class="btn reveal" href="/library/">Open the library →</a>
+        <div class="ctas reveal"><a class="btn primary" href="/library/">Open the library →</a><a class="btn" href="/docs/library-submit/">Submit a dash</a></div>
       </div>
     </section>
 
@@ -253,7 +255,11 @@ const features = [
   .flow text.sub { fill: var(--text-3); font-size: 13px; font-weight: 500; }
   .pulse circle { fill: #ff4d58; }
   .pulse circle.halo { fill: url(#pulseglow); }
+  .getting { margin: 56px 0 18px; }
   .steps b { font: 700 40px/1 var(--display); color: var(--red); display: block; margin-bottom: 10px; }
+  .steps a.card { display: block; border-bottom: 1px solid var(--line); }
+  .steps .hl { border-color: rgba(255, 31, 45, 0.45); }
+  .steps .opt { color: var(--red); font-weight: 600; }
   .lib-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; margin: 30px 0; }
   .lib-row :global(.lib-card) { border-radius: 16px; overflow: hidden; border: 1px solid var(--line); background: #0c0d10; transition: transform 0.4s var(--ease), box-shadow 0.4s; }
   .lib-row :global(.lib-card:hover) { transform: translateY(-6px) rotateX(3deg); box-shadow: 0 30px 60px -20px rgba(255,31,45,0.35); }

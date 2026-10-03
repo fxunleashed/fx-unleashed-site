@@ -1,50 +1,50 @@
-# Submitting a dash or screensaver
+# Share and submit dashes
 
-**No Git? Use the form:** package it in the plugin (step 2 below: it writes `<id>.fxdash.zip`) and drag that file into a
-[Submit a dash](https://github.com/fxunleashed/fx-unleashed-library/issues/new?template=submit-dash.yml) issue.
-A bot checks the package and, if it passes, **publishes it on the spot** (or comments with what to fix: edit the issue
-with the new package and it checks again). The steps below are for doing it yourself with a pull request.
+Three ways, from the quickest to the widest. None of them needs Git.
 
-1. **Make it** in the plugin's dash designer (Dashes tab > Edit in the designer) or as a JSON file. Get it to pass
-   the designer's checks with no warnings: no flashing, text that fits, low USB traffic. The `create-dash` guide in
-   the plugin repo explains the rules the wheel's screen imposes.
-2. **Package it:** in the plugin, pick your dash on the Dashes tab and press **Package for the library**. Fill in
-   the name, games, tags and licence, and confirm it's your work (or that you have permission). The plugin writes
-   `LibraryPackages\dashes\<id>\` with `dash.json`, `meta.json` (with the measured cost) and `preview.png`.
-   Or from the command line:
-   ```
-   fxdash package my-dash.json <this repo> --id my-dash --author "Me" --license CC-BY-4.0 --games "LMU,IRacing" --tags "gt3"
-   ```
-3. **Add the folder** to `dashes/` (or `savers/`) in your fork and open a pull request. Only your item's folder (and
-   `index.json`, if you rebuilt it with `python tools/build_index.py`) may change; `index.json` is rebuilt after the merge anyway.
-4. A check runs on your pull request (files, sizes, checksum, format, no scripts, preview size). If every rule below
-   holds, **it merges by itself**; if something's wrong the check comments with what to fix, and pushing the fix runs it
-   again. It's in the plugin and on the website a few minutes after the merge.
+## Send one to a friend
 
-## Updating your item
+Dashes tab, pick your dash, **Share...**. It saves one file (`<name>.fxdash.json`, pictures inside) and puts it on the clipboard, so
+you can paste it into a message. Your friend drops it on the plugin's Dashes tab, or presses **Import a file...**. The plugin
+checks it like a library dash (format, size, no scripts), and it never replaces a dash they already have.
 
-Package it again with a **higher Version** (the plugin's dialog has a Version field; `fxdash package --version`) and send
-it the same way: the form, or a pull request that replaces the item's three files. You own what you published, so it goes
-in on its own; nobody else can change it (a maintainer can). Players who installed it see "Update to vX".
-To take an item down, delete its folder in a pull request.
+Sharing something you converted from someone else's SimHub dash? Only with its author's permission.
 
-## What goes in without a person looking
+## Send a library dash
 
-A pull request, or a form submission, is published automatically when all of this holds (`tools/gate.py`, with tests):
+Every library item has a **Copy link** button, in the plugin and on [the library page](/library/). The link opens a page with a live
+preview, an **Install in the plugin** button and a download.
 
-- it only adds, changes or removes item folders (`dashes/<id>/` or `savers/<id>/` with `dash.json`, `meta.json`,
-  `preview.png`), never workflows, tools or `index.json` (that file decides what the plugin downloads, so only the repo's
-  own automation writes it);
-- at most 3 items at once and 3 new items per person per day;
-- every item passes the checks: format, sizes, checksum, no scripts, 800x480 preview, `Permission` for converted work;
-- a new item becomes yours (`owners.json`); only you or a maintainer can update or remove it, and an update raises `Version`;
-- the library's own seed items have no owner: only maintainers change them.
+## Submit it to the library
 
-Anything else waits for a maintainer, with a comment saying why. The automatic path never runs anything from your
-submission: it only reads the files.
+For everyone to use. You need to have made it, or have its author's permission.
 
-## Rights
+1. **Make it** in the plugin's [designer](/docs/dash-designer/) (Dashes tab, *Edit in the designer*) until its checks show no
+   warnings: no flashing, text that fits, low USB traffic.
+2. **Package it:** Dashes tab, pick your dash, **Package for the library**. Fill in the name, games, tags, licence and
+   version, and tick that it's yours. It writes a file called `<id>.fxdash.zip` and offers to open the submit form.
+3. **Submit it:** open the [Submit a dash](https://github.com/fxunleashed/fx-unleashed-library/issues/new?template=submit-dash.yml)
+   form, drag the `.zip` into the box, tick the three boxes and submit.
+4. **A bot checks it** (format, size, no scripts, the preview, the checksum). If everything passes it's **published on the spot**:
+   the form closes with a link, and it's in the library and the plugin a few minutes later, credited to you. If something's
+   wrong it tells you exactly what; fix it, replace the `.zip` by editing the issue, and it checks again.
 
-Submitting means you made it, or have permission from whoever did, and license it under the licence in its meta.json.
-Converted work (a SimHub dash, another game's dash, someone's design) needs `Source` (what it's based on) and
-`Permission` (a link to where its author agreed) in meta.json. No logos or product photos you don't own. See TERMS.md.
+## Update or remove yours
+
+**Update:** package it again with a **higher Version** and submit the same way. Only the account that submitted a dash can update it.
+Players who installed it see "Update to vX". **Remove:** open an issue or a pull request that deletes its folder.
+
+## The rules
+
+- Your own work, or made with the original author's written permission. Converted work (a SimHub dash, someone's design)
+  needs *Based on* and a link to where its author agreed (*Permission*). No logos or product photos you don't own.
+- No scripts: no `js:` formulas and no scripts folder. SimHub properties and NCalc formulas are fine.
+- Up to 1 MB, a current dash format, an 800x480 preview (the plugin renders it), and at most three new items a day.
+- It goes in under the library's [terms](/legal/#library-terms). If something shouldn't be there, tell us and it comes down while it's
+  looked at.
+
+## Prefer Git?
+
+Open a pull request that adds your item's folder (`dashes/<id>/` or `savers/<id>/`, with `dash.json`, `meta.json` and `preview.png`;
+the plugin's package writes them). The same checks run and merge it when they pass. The details are in the library's
+[CONTRIBUTING.md](https://github.com/fxunleashed/fx-unleashed-library/blob/main/CONTRIBUTING.md).
