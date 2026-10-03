@@ -18,10 +18,12 @@ export const site = {
   releasesPage: "https://github.com/fxunleashed/fx-unleashed/releases",
   firmwareRepo: "https://github.com/fxunleashed/fx-unleashed-firmware",
   firmwareReleases: "https://github.com/fxunleashed/fx-unleashed-firmware/releases",
+  firmwareApi: "https://api.github.com/repos/fxunleashed/fx-unleashed-firmware/releases/latest",
   contact: "https://github.com/fxunleashed/fx-unleashed/issues",
+  discord: "https://discord.gg/P9Rz6fXrRc",
 };
 
-export const nav = [
+export const nav: { href: string; label: string; external?: boolean }[] = [
   { href: "/", label: "Home" },
   { href: "/start/", label: "Get started" },
   { href: "/library/", label: "Library" },
@@ -30,6 +32,7 @@ export const nav = [
   { href: "/firmware/", label: "Firmware" },
   { href: "/changelog/", label: "Changelog" },
   { href: "/faq/", label: "FAQ" },
+  { href: site.discord, label: "Discord", external: true },
 ];
 
 export const disclaimer =

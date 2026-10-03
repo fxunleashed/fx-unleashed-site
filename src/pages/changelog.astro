@@ -17,10 +17,29 @@ import { site } from "../config";
   .releases :global(.rel h2) { font-size: 30px; text-transform: none; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
   .releases :global(.tag) { font: 700 10px/1 var(--display); letter-spacing: 0.2em; text-transform: uppercase; padding: 6px 9px; border-radius: 6px; background: rgba(255,176,0,0.12); color: var(--amber); }
   .releases :global(.date) { color: var(--text-3); font-size: 13px; }
-  .releases :global(.body) { white-space: pre-wrap; color: var(--text-2); font-size: 14.5px; margin-top: 12px; }
+  .releases :global(.body) { color: var(--text-2); font-size: 14.5px; margin-top: 12px; }
+  .releases :global(.body h1), .releases :global(.body h2) { font-size: 20px; margin: 18px 0 8px; text-transform: none; }
+  .releases :global(.body h3) { font-size: 16px; margin: 16px 0 6px; }
+  .releases :global(.body p), .releases :global(.body li) { margin: 0 0 8px; }
+  .releases :global(.body ul), .releases :global(.body ol) { padding-left: 22px; margin: 0 0 10px; }
+  .releases :global(.body blockquote) { margin: 0 0 12px; padding: 0 0 0 12px; border-left: 2px solid var(--line); color: var(--text-3); font-size: 12.5px; }
+  .releases :global(.body a) { color: var(--red-2); border-bottom: 1px solid rgba(255, 90, 100, 0.35); }
+  .releases :global(.body code) { font: 0.88em var(--mono); background: rgba(255, 255, 255, 0.06); padding: 1px 5px; border-radius: 5px; }
 </style>
 <script>
+  import { Marked } from "marked";
   import { site } from "../config";
+  // release notes are Markdown written by the maintainers: shown formatted, with raw HTML dropped and only web links kept
+  const md = new Marked({ gfm: true });
+  md.use({
+    renderer: {
+      html: () => "",
+      link({ href, tokens }) {
+        const text = this.parser.parseInline(tokens);
+        return /^https?:\/\//i.test(href ?? "") ? `<a href="${href}" rel="noopener" target="_blank">${text}</a>` : text;
+      },
+    },
+  });
   const box = document.getElementById("releases")!;
   fetch(site.releasesApi).then(r => (r.ok ? r.json() : Promise.reject(r.status))).then((list: any[]) => {
     if (!list.length) throw new Error("none");
@@ -30,7 +49,7 @@ import { site } from "../config";
       const a = el.querySelector("a")!; a.textContent = r.name || r.tag_name; a.href = r.html_url;
       if (r.prerelease) { const t = document.createElement("span"); t.className = "tag"; t.textContent = "beta"; el.querySelector("h2")!.appendChild(t); }
       el.querySelector(".date")!.textContent = new Date(r.published_at).toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" });
-      el.querySelector(".body")!.textContent = r.body || "";
+      el.querySelector(".body")!.innerHTML = md.parse(r.body || "") as string;
       return el;
     }));
   }).catch(() => {
