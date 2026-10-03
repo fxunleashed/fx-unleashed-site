@@ -1,8 +1,8 @@
 # Share and submit dashes
 
 > **Where this fits:** step 4 of the [setup guide](/start/#4-pick-your-dashes-and-lights). It needs the plugin
-> ([step 2](/start/#2-install-the-plugin)); to see a dash on the wheel you also need the wheel app
-> ([step 1](/start/#1-install-the-wheel-app)), and the screen's RAM patch ([step 3](/start/#3-turn-on-picture-memory), optional but
+> ([step 2](/start/#2-install-the-plugin)); to see a dash on the wheel you also need the custom firmware
+> ([step 1](/start/#1-install-the-custom-firmware)), and the screen's RAM patch ([step 3](/start/#3-turn-on-picture-memory), optional but
 > highly recommended) for full-colour pictures. Making a dash: the [dash designer](/docs/dash-designer/).
 
 Three ways, from the quickest to the widest. None of them needs Git.

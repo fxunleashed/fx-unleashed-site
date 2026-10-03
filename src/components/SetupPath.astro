@@ -1,11 +1,11 @@
 ---
 // Where a page sits in the whole path: the four things a newcomer does, each linking to its step in the guide.
-// Pages that explain one part of the process (the wheel app, the library, the guide itself) show this so nobody
+// Pages that explain one part of the process (the custom firmware, the library, the guide itself) show this so nobody
 // has to guess what comes before or after.
 interface Props { current?: 1 | 2 | 3 | 4; title?: string }
 const { current, title = "The whole path" } = Astro.props;
 const steps = [
-  { n: 1, title: "Wheel app", note: "~10 min · for Unleashed mode", href: "/start/#1-install-the-wheel-app" },
+  { n: 1, title: "Custom firmware", note: "~10 min · for Unleashed mode", href: "/start/#1-install-the-custom-firmware" },
   { n: 2, title: "Plugin", note: "~2 min", href: "/start/#2-install-the-plugin" },
   { n: 3, title: "Picture memory (RAM patch)", note: "Optional · highly recommended", href: "/start/#3-turn-on-picture-memory", hl: true },
   { n: 4, title: "Dashes and lights", note: "Make it yours", href: "/start/#4-pick-your-dashes-and-lights" },

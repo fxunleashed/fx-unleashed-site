@@ -6,13 +6,13 @@ import { render, docs, byName } from "../lib/md";
 const md = byName(docs, "setup.md").replace(/^﻿?\s*# [^\n]*\n/, "").replace(/^Three steps:[\s\S]*?\n\n/m, ""); // the lead above says it already
 const { html, toc } = render(md);
 ---
-<Base title="Get started" description="Three steps to your own dashes and lights on the Simagic FX Pro: the wheel app, the plugin, and picture memory for the screen.">
+<Base title="Get started" description="Three steps to your own dashes and lights on the Simagic FX Pro: the custom firmware, the plugin, and picture memory for the screen.">
   <DocPage html={html} toc={toc}>
     <Fragment slot="before">
       <h1>Get started</h1>
-      <p class="lead">One guide, start to finish: the wheel app, the plugin, and (optional, but highly recommended) picture memory, the screen's RAM patch. Every step says what you should see.</p>
+      <p class="lead">One guide, start to finish: the custom firmware, the plugin, and (optional, but highly recommended) picture memory, the screen's RAM patch. Every step says what you should see.</p>
       <div class="quick">
-        <a class="q" href="#1-install-the-wheel-app"><b>1</b><span>Wheel app<small>~10 min</small></span></a>
+        <a class="q" href="#1-install-the-custom-firmware"><b>1</b><span>Custom firmware<small>~10 min</small></span></a>
         <a class="q" href="#2-install-the-plugin"><b>2</b><span>Plugin<small>~2 min</small></span></a>
         <a class="q hl" href="#3-turn-on-picture-memory"><b>3</b><span>Picture memory (RAM patch)<small>Optional · highly recommended</small></span></a>
         <a class="q" href="#4-pick-your-dashes-and-lights"><b>4</b><span>Dashes and lights<small>Make it yours</small></span></a>

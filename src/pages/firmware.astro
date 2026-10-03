@@ -6,11 +6,11 @@ import { site } from "../config";
 import SetupPath from "../components/SetupPath.astro";
 const warning = render(byName(legal, "firmware-warning.md")).html;
 ---
-<Base title="Firmware" description="Download the FX Unleashed wheel app for the Simagic FX Pro, install it in a few simple steps, and go back to stock whenever you like.">
+<Base title="Firmware" description="Download the FX Unleashed custom firmware for the Simagic FX Pro, flash it with SimPro in a few simple steps, and go back to stock whenever you like.">
   <section class="wrap page">
     <p class="eyebrow">Firmware</p>
-    <h1>The <span class="red">wheel app</span></h1>
-    <p class="lead">Unleashed mode needs our version of the wheel's own small program. Download it here, then follow the install steps: about 10 minutes, and Simagic's original is always one reinstall away.</p>
+    <h1>The <span class="red">custom firmware</span></h1>
+    <p class="lead">Unleashed mode needs our custom firmware: Simagic's own firmware with our changes. Download it here, then follow the install steps: about 10 minutes, and Simagic's original is always one flash away.</p>
 
     <SetupPath current={1} />
 
@@ -21,25 +21,26 @@ const warning = render(byName(legal, "firmware-warning.md")).html;
 
     <div class="get card" id="get-it">
       <div>
-        <p class="eyebrow">Newest wheel app</p>
-        <h2 data-fw-build>The wheel app</h2>
-        <p class="meta"><span data-fw-file>FXUnleashed-wheelapp</span> · <span data-fw-size>one small file</span> · for the FX Pro, wheel app 1.3.11</p>
+        <p class="eyebrow">Newest custom firmware</p>
+        <h2 data-fw-build>The custom firmware</h2>
+        <p class="meta"><span data-fw-file>FXUnleashed-firmware</span> · <span data-fw-size>one small file</span> · for the FX Pro, firmware 1.3.11</p>
       </div>
       <p class="actions">
         <a class="btn primary" data-fw-download href={site.firmwareReleases}>Download</a>
-        <a class="btn" href="/start/#1-install-the-wheel-app">Install steps</a>
+        <a class="btn" href="/start/#1-install-the-custom-firmware">Install steps</a>
       </p>
     </div>
 
-    <p class="next muted">The <a href="/start/#1-install-the-wheel-app">install guide</a> goes on from here with the plugin and the screen's RAM patch (picture memory): optional, but highly recommended. One guide, start to finish.</p>
+    <p class="next muted">The <a href="/start/#1-install-the-custom-firmware">install guide</a> goes on from here with the plugin and the screen's RAM patch (picture memory): optional, but highly recommended. One guide, start to finish.</p>
 
     <h2 id="back-to-stock">Back to stock</h2>
     <div class="prose">
       <ol>
-        <li>Make sure Simagic's original file is back in SimPro's wheel folder (the last step of the install).</li>
-        <li>Wheel on the base, base on, USB cable in. In SimPro open Device, FX Pro, Firmware and reinstall wheel app 1.3.11.</li>
-        <li>Wait until SimPro says it's done. If it hangs after the wheel enters boot mode, close SimPro, start it again and reinstall.</li>
-        <li>That's Simagic's own app again. The plugin's Wheel tab then shows no patch build.</li>
+        <li>If you turned on the screen's RAM patch (picture memory), turn it off first: in SimHub open FX Unleashed, then the Wheel tab, the Firmware card, and press Turn it off.</li>
+        <li>Make sure Simagic's original file is back in SimPro's firmware folder (the last step of the install).</li>
+        <li>Wheel on the base, base on, USB cable in. In SimPro open Settings &gt; Update, scroll to the bottom (Manual Firmware Flash), press Flash on the FX PRO row and select Simagic's original file, FXPro_App-V1.3.11.0-00000000.sfu, in that folder.</li>
+        <li>Wait until SimPro says it's done. If it hangs after the wheel enters boot mode, close SimPro, start it again and flash again.</li>
+        <li>That's Simagic's own firmware again. The plugin's Wheel tab then shows no build number for the custom firmware.</li>
       </ol>
     </div>
 
@@ -48,20 +49,20 @@ const warning = render(byName(legal, "firmware-warning.md")).html;
     <div class="prose">
       <details>
         <summary>What this file is</summary>
-        <p>Simagic's own wheel app 1.3.11 with our changes. It is Simagic's software, shared by a community project without Simagic's involvement, and it may be taken down, so keep a copy. We never publish the key that protects Simagic's firmware, anywhere.</p>
+        <p>Simagic's own firmware 1.3.11 with our changes. It is Simagic's software, shared by a community project without Simagic's involvement, and it may be taken down, so keep a copy. We never publish the key that protects Simagic's firmware, anywhere.</p>
         <p>It only changes the wheel's own app (lights, screen, buttons, USB). Your base and force feedback aren't involved.</p>
       </details>
 
       <details id="check">
         <summary>Check your download</summary>
         <p>The file's fingerprint (SHA-256) and size, read from the release itself:</p>
-        <p><code data-fw-file>FXUnleashed-wheelapp</code><br /><code data-fw-bytes>(shown on the release page)</code><br /><code data-fw-sha>(shown on the release page)</code></p>
-        <p>To check yours, open PowerShell in the folder with the file and run <code>Get-FileHash .\FXUnleashed-wheelapp-*.sfu</code>. The result must match exactly. If it doesn't, don't use the file.</p>
+        <p><code data-fw-file>FXUnleashed-firmware</code><br /><code data-fw-bytes>(shown on the release page)</code><br /><code data-fw-sha>(shown on the release page)</code></p>
+        <p>To check yours, open PowerShell in the folder with the file and run <code>Get-FileHash .\FXUnleashed-firmware-*.sfu</code>. The result must match exactly. If it doesn't, don't use the file.</p>
       </details>
 
       <details>
         <summary>Make it yourself from your own SimPro copy</summary>
-        <p>The <a href={site.firmwareRepo}>firmware repository</a> has a patch tool. It checks that your copy of the wheel app in SimPro's folder is Simagic's original, applies our changes and checks the result against the same checksum, so you get identical bytes. Either way you install through SimPro, exactly as you would a firmware update, and then put Simagic's original back. Its <a href={`${site.firmwareRepo}/blob/main/docs/install.md`}>guide</a> has the steps.</p>
+        <p>The <a href={site.firmwareRepo}>firmware repository</a> has a patch tool. It checks that your copy of the custom firmware in SimPro's folder is Simagic's original, applies our changes and checks the result against the same checksum, so you get identical bytes. Either way you flash it with SimPro (Settings > Update > Manual Firmware Flash), and then put Simagic's original back. Its <a href={`${site.firmwareRepo}/blob/main/docs/install.md`}>guide</a> has the steps.</p>
       </details>
 
       <details>

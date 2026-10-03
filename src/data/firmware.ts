@@ -1,4 +1,4 @@
-// The wheel app builds, newest last. Facts only (what changes, how it's gated); addresses and code stay in the
+// The custom firmware builds, newest last. Facts only (what changes, how it's gated); addresses and code stay in the
 // firmware repo. Update this when a build ships.
 export const BUILDS = [
   { n: 4, title: "Every light, any colour · the PC owns the screen", status: "tested", text: "All 38 LEDs take their colour from the PC; the plugin can take over the screen and gives it back when it stops (1 s keepalive)." },
@@ -15,5 +15,5 @@ export const LAYERS = [
   { title: "Emulated against stock", text: "Every changed routine runs in an emulator from both images over every input and mode, including a negative control that must fail." },
   { title: "Byte-identical round trip", text: "Each build is packaged, unpacked again and compared byte for byte before it's ever flashed." },
   { title: "One change per build", text: "If something misbehaves on a wheel, only one thing changed." },
-  { title: "Stock is one reinstall away", text: "SimPro's own reinstall of wheel app 1.3.11 puts Simagic's firmware back." },
+  { title: "Stock is one flash away", text: "Flashing Simagic's original 1.3.11 with SimPro (Manual Firmware Flash) puts Simagic's firmware back." },
 ];

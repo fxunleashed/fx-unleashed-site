@@ -1,4 +1,4 @@
-// The newest wheel app, straight from the firmware repository's latest release: the build number, file name, size and
+// The newest custom firmware, straight from the firmware repository's latest release: the build number, file name, size and
 // SHA-256 are read from GitHub (the release file's own checksum), so nothing here is typed by hand when a new build ships.
 // Without an answer (offline, rate limit) the pages keep their plain links to the releases page.
 import { site } from "../config";
