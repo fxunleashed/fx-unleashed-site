@@ -28,6 +28,8 @@ const warning = render(byName(legal, "firmware-warning.md")).html;
       </p>
     </div>
 
+    <p class="next muted">The <a href="/start/#1-install-the-wheel-app">install guide</a> goes on from here with the plugin and the screen's RAM patch (picture memory): optional, but highly recommended. One guide, start to finish.</p>
+
     <h2 id="back-to-stock">Back to stock</h2>
     <div class="prose">
       <ol>
@@ -99,6 +101,8 @@ const warning = render(byName(legal, "firmware-warning.md")).html;
   h2 { margin-top: 70px; }
   .get h2 { margin-top: 6px; }
   .curious { margin-bottom: 6px; }
+  .next { margin-top: 18px; }
+  .next a { color: var(--red-2); border-bottom: 1px solid rgba(255, 90, 100, 0.35); }
   .layers { list-style: none; padding: 0; margin: 18px 0; display: grid; gap: 14px; counter-reset: l; }
   .layers li { display: flex; gap: 18px; padding: 18px; border-radius: 16px; background: rgba(255,255,255,0.03); border: 1px solid var(--line); }
   .ring { flex: none; width: 42px; height: 42px; border-radius: 50%; border: 2px solid var(--red); box-shadow: 0 0 20px var(--red-glow), inset 0 0 12px var(--red-glow); position: relative; }
