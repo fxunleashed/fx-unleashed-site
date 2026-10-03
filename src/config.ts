@@ -16,6 +16,8 @@ export const site = {
   pluginPort: 8899, // the plugin's local server (designer, library install, screen mirror)
   releasesApi: "https://api.github.com/repos/fxunleashed/fx-unleashed/releases",
   releasesPage: "https://github.com/fxunleashed/fx-unleashed/releases",
+  firmwareRepo: "https://github.com/fxunleashed/fx-unleashed-firmware",
+  firmwareReleases: "https://github.com/fxunleashed/fx-unleashed-firmware/releases",
   contact: "https://github.com/fxunleashed/fx-unleashed/issues",
 };
 

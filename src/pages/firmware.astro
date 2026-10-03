@@ -2,10 +2,11 @@
 import Base from "../layouts/Base.astro";
 import { render, legal, byName } from "../lib/md";
 import { BUILDS, LAYERS } from "../data/firmware";
+import { site } from "../config";
 const warning = render(byName(legal, "firmware-warning.md")).html;
 const back = render(byName(legal, "back-to-stock.md")).html;
 ---
-<Base title="Firmware" description="How the FX Unleashed wheel app is built and checked, what each build changes, how you get it, and how to go back to stock.">
+<Base title="Firmware" description="The FX Unleashed wheel app: what each build changes, how it was checked, where to download it, and how to go back to stock.">
   <section class="wrap page">
     <p class="eyebrow">Firmware</p>
     <h1>Built <span class="red">carefully</span>.</h1>
@@ -38,13 +39,14 @@ const back = render(byName(legal, "back-to-stock.md")).html;
 
     <h2 class="reveal" id="how">How you get it</h2>
     <div class="prose reveal">
-      <p>We never hand out Simagic's firmware, patched or not, and nothing here includes the key that protects it. What we publish is only <strong>our changes</strong>: a few bytes of hooks and some code of our own, packed as a <em>patch file</em>, plus a tool that applies it to <strong>your own copy</strong> of the wheel app.</p>
+      <p>The wheel app is published in its own repository, <a href={site.firmwareRepo}>fx-unleashed-firmware</a>: <strong>build 9</strong> as a download (96,272 bytes, with its SHA-256), and the patch tool that makes the identical file on your PC from your own copy of Simagic's wheel app.</p>
+      <p>Be clear about what the download is: <strong>Simagic's wheel app with our changes</strong>. It is Simagic's software, shared by a community project without Simagic's involvement, and it may be taken down. The key that protects Simagic's firmware is not published by us, here or anywhere.</p>
       <ul>
-        <li>The tool first checks that your copy is Simagic's original (by its checksum). If it isn't, it stops.</li>
-        <li>It writes the patched file next to it and checks the result against the published checksum. If that doesn't match, it stops.</li>
-        <li>You then install it through SimPro, exactly as you would a firmware update, after ticking the risk acknowledgement. Reinstalling the stock app (below) is always one step away.</li>
+        <li>Check the SHA-256 of what you downloaded before you use it. If it doesn't match the one on the release page, don't use it.</li>
+        <li>Prefer not to download a modified vendor file? The patch tool checks that your copy is Simagic's original (by its checksum), applies our changes, and checks the result against the same published checksum. You get identical bytes.</li>
+        <li>Either way you install through SimPro, exactly as you would a firmware update, after reading the warning above, and then put Simagic's original back. Reinstalling the stock app (below) is always one step away.</li>
       </ul>
-      <p><strong>Status:</strong> the patch files and this guide are being finalised and will be published here and on GitHub with the stable 0.5.0 release. Until then this page is information only, and the plugin works fully in standard mode, which needs no firmware at all.</p>
+      <p class="actions"><a class="btn primary" href={site.firmwareReleases}>Download build 9</a> <a class="btn" href={`${site.firmwareRepo}/blob/main/docs/install.md`}>Install guide</a></p>
     </div>
 
     <h2 class="reveal" id="back-to-stock">Back to stock</h2>
