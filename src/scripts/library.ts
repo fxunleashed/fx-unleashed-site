@@ -5,7 +5,7 @@ import { site } from "../config";
 export interface LibraryItem {
   Id: string; Kind: "dash" | "saver"; Name: string; Author: string; Description?: string; Version: string;
   Games?: string[]; Cars?: string[]; Tags?: string[]; License?: string; Source?: string;
-  Created?: string; Updated?: string; FormatVersion?: number; MinPlugin?: string;
+  Created?: string; Updated?: string; FormatVersion?: number; MinPlugin?: string; HasScript?: boolean;
   BytesStatic?: number; BytesPerSecond?: number; Sha256?: string; DashUrl: string; PreviewUrl: string;
 }
 export interface LibraryIndex { Schema: number; Generated: string; Items: LibraryItem[] }

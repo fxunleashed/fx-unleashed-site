@@ -111,6 +111,7 @@ async function open(i: LibraryItem) {
     ["First draw", i.BytesStatic ? `${(i.BytesStatic / 1000).toFixed(1)} KB` : "-"],
     ["Games", i.Games?.length ? i.Games.join(", ") : "any"],
     ["Needs plugin", i.MinPlugin ? "v" + i.MinPlugin : "any"],
+    ...(i.HasScript ? [["Script", "Contains a checked script"] as [string, string]] : []),
   ];
   $("item-facts").replaceChildren(...facts.map(([k, v]) => { const d = document.createElement("div"); d.innerHTML = "<dt></dt><dd></dd>"; d.querySelector("dt")!.textContent = k; d.querySelector("dd")!.textContent = v; return d; }));
   $("item-tags").replaceChildren(...(i.Tags ?? []).map(t => { const s = document.createElement("span"); s.className = "chip"; s.textContent = "#" + t; return s; }));

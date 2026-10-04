@@ -135,6 +135,9 @@ const swatchOf = (p: PresetData) =>
 
 export const PRESETS: Preset[] = DATA.map(p => ({ ...p, rev: REV, flash: FLASH, swatch: swatchOf(p) }));
 
+/** The look every wheel on the site starts with (before a visitor picks another). */
+export const DEFAULT_PRESET: Preset = PRESETS.find(p => p.id === "rainbow") ?? PRESETS[0];
+
 export function hex(h: string): RGB {
   const n = parseInt(h.replace("#", ""), 16);
   return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255];
@@ -227,7 +230,7 @@ function alertLevel(a: AlertRule, i: number, n: number, age: number): number {
 }
 
 export class LightEngine {
-  preset: Preset = PRESETS[0];
+  preset: Preset = DEFAULT_PRESET;
   /** Hand-painted colours by LED index (the light lab, "paint" mode); null = the preset's. */
   painted = new Map<number, RGB | null>();
   /** 0..1: how far the start-up sequence has run (LEDs ignite in order). */

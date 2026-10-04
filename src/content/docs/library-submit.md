@@ -11,7 +11,7 @@ Three ways, from the quickest to the widest. None of them needs Git.
 
 Dashes tab, pick your dash, **Share...**. It saves one file (`<name>.fxdash.json`, pictures inside) and puts it on the clipboard, so
 you can paste it into a message. Your friend drops it on the plugin's Dashes tab, or presses **Import a file...**. The plugin
-checks it like a library dash (format, size, no scripts), and it never replaces a dash they already have.
+checks it like a library dash (format, size, checked scripts), and it never replaces a dash they already have.
 
 Sharing something you converted from someone else's SimHub dash? Only with its author's permission.
 
@@ -37,7 +37,7 @@ submit form is a GitHub page, and that's the only thing to sign up for (nothing 
 3. **Submit it:** on the [Submit a dash](https://github.com/fxunleashed/fx-unleashed-library/issues/new?template=submit-dash.yml)
    form (sign in to GitHub if it asks), pick **A dash** or **A screensaver**, then add the `.zip` to the **Package** box: drag it in from Explorer, or click **selecting
    them** under the box and pick the file. Tick the three boxes and press **Submit new issue**.
-4. **A bot checks it** (format, size, no scripts, the preview, the checksum). If everything passes it's **published on the spot**:
+4. **A bot checks it** (format, size, scripts, the preview, the checksum). If everything passes it's **published on the spot**:
    the form closes with a link, and it's in the library and the plugin a few minutes later, credited to you. If something's
    wrong it tells you exactly what; fix it, replace the `.zip` by editing the issue, and it checks again.
 
@@ -50,7 +50,7 @@ Players who installed it see "Update to vX". **Remove:** open an issue or a pull
 
 - Your own work, or made with the original author's written permission. Converted work (a SimHub dash, someone's design)
   needs *Based on* and a link to where its author agreed (*Permission*). No logos or product photos you don't own.
-- No scripts: no `js:` formulas and no scripts folder. SimHub properties and NCalc formulas are fine.
+- Scripts: SimHub properties and NCalc formulas are always fine. A `js:` formula must pass the automatic script check (a short list of safe parts: no loops, no `eval`, no functions of its own; see [SCRIPTS.md](https://github.com/fxunleashed/fx-unleashed-library/blob/main/SCRIPTS.md)), and a scripts folder is never allowed. The bot tells you which part it refused.
 - Up to 1 MB, a current dash format, an 800x480 preview (the plugin renders it), and at most three new items a day.
 - It goes in under the library's [terms](/legal/#library-terms). If something shouldn't be there, tell us and it comes down while it's
   looked at.

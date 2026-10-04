@@ -1,7 +1,7 @@
 ---
 import Base from "../layouts/Base.astro";
 import { wheels, defaultWheel } from "../data/wheels/index";
-import { PRESETS } from "../scripts/engine/lights";
+import { PRESETS, DEFAULT_PRESET } from "../scripts/engine/lights";
 import { site } from "../config";
 import Icon from "../components/Icon.astro";
 const w = defaultWheel;
@@ -50,7 +50,7 @@ const features = [
       <h2>Every light.<br />Any colour.</h2>
       <p>Rev bar, side lights, button caps, encoder rings: {w.leds.length} LEDs, each its own colour, 30 times a second. Shift lights follow each car's real data.</p>
       <div class="chips" id="presets">
-        {PRESETS.map((p, i) => <button class="chip" data-preset={p.id} aria-pressed={i === 0 ? "true" : "false"}><span class="dot" style={`background:${p.swatch};color:${p.accent}`}></span>{p.name}</button>)}
+        {PRESETS.map((p, i) => <button class="chip" data-preset={p.id} aria-pressed={p === DEFAULT_PRESET ? "true" : "false"}><span class="dot" style={`background:${p.swatch};color:${p.accent}`}></span>{p.name}</button>)}
       </div>
       <p class="muted small">Click any light on the wheel to change its colour. <a href="/lab/" class="red">Open the light lab →</a></p>
     </div></div>

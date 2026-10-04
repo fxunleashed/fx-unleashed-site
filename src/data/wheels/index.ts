@@ -17,7 +17,7 @@ export interface Wheel {
   /** Paddles behind the faceplate (left side; mirrored): rounded boxes, `back` mm behind the plate. */
   paddles?: { x: number; y: number; w: number; h: number; r: number; back: number }[];
   /** Rollers (left side; mirrored): "upright" rolls sideways (axis up the face, tilted), "wheel" rolls up and down. */
-  rollers?: { kind: "upright" | "wheel"; x: number; y: number; r: number; len: number; tilt?: number; bracket?: [number, number, number, number] }[];
+  rollers?: { kind: "upright" | "wheel"; x: number; y: number; r: number; len: number; tilt?: number }[];
   funky?: { x: number; y: number; r: number };
   /** Screw heads (left side; mirrored). */
   screws?: [number, number][];

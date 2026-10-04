@@ -400,17 +400,11 @@ export function buildWheel(w: Wheel, opts: { quality?: "high" | "low" } = {}): W
         knurl.position.y = -len * 0.24;
         ctl.add(knurl);
       } else {
-        // at the thumb opening's inner edge, rolling up and down: a red knurled wheel, axis across, on a black bracket
+        // at the thumb opening's inner edge, rolling up and down: a red knurled wheel, axis across
         ctl.position.copy(toLocal(x, rl.y, front + 0.01));
         const wheelG = new THREE.Mesh(flutedY(r, len, 14, 0.14), redAlu);
         wheelG.rotation.z = Math.PI / 2;
         ctl.add(wheelG);
-        if (rl.bracket) {
-          const [bx, by, bw, bh] = rl.bracket;
-          const bxx = right ? w.size[0] - bx - bw : bx;
-          const br = add(new THREE.Mesh(keep(new RoundedBoxGeometry(bw * k, bh * k, 0.03, 3, 0.004)), blackAlu));
-          br.position.copy(toLocal(bxx + bw / 2, by + bh / 2, front - 0.005));
-        }
       }
       ctl.traverse(o => { if ((o as THREE.Mesh).isMesh) { o.castShadow = o.receiveShadow = true; } });
       group.add(ctl);

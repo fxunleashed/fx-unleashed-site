@@ -87,8 +87,8 @@ def main():
         "rollers": [
             {"$comment": "outer roller on the pod's corner: black body, red knurl below; rolls sideways",
              "kind": "upright", "x": 62, "y": 113, "r": 20, "len": 52, "tilt": -16},
-            {"$comment": "inner roller at the opening's inner edge, on a bracket; rolls up and down",
-             "kind": "wheel", "x": 168, "y": 153, "r": 24, "len": 18, "bracket": [133, 124, 14, 32]},
+            {"$comment": "inner roller at the opening's inner edge; rolls up and down",
+             "kind": "wheel", "x": 168, "y": 153, "r": 24, "len": 18},
         ],
         "funky": {"x": W / 2, "y": 318, "r": 9},
         "screws": r1([(75, 82), (130, 70), (152, 256), (166, 318), (194, 210), (222, 319), (208, 40), (262, 328)]),

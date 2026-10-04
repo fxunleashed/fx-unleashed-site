@@ -3222,18 +3222,12 @@
    "tilt": -16
   },
   {
-   "$comment": "inner roller at the opening's inner edge, on a bracket; rolls up and down",
+   "$comment": "inner roller at the opening's inner edge; rolls up and down",
    "kind": "wheel",
    "x": 168,
    "y": 153,
    "r": 24,
-   "len": 18,
-   "bracket": [
-    133,
-    124,
-    14,
-    32
-   ]
+   "len": 18
   }
  ],
  "funky": {

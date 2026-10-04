@@ -1,6 +1,6 @@
 ---
 import Base from "../layouts/Base.astro";
-import { PRESETS } from "../scripts/engine/lights";
+import { PRESETS, DEFAULT_PRESET } from "../scripts/engine/lights";
 import { defaultWheel } from "../data/wheels/index";
 const groups = Object.entries(defaultWheel.groups);
 ---
@@ -16,7 +16,7 @@ const groups = Object.entries(defaultWheel.groups);
         <summary>Presets</summary>
         <div class="presets">
           {PRESETS.map((p, i) => (
-            <button class="preset" data-preset={p.id} aria-pressed={i === 0 ? "true" : "false"}>
+            <button class="preset" data-preset={p.id} aria-pressed={p === DEFAULT_PRESET ? "true" : "false"}>
               <span class="bar" style={`background:${p.swatch}`}></span>
               <b>{p.name}</b><small>{p.blurb}</small>
             </button>
