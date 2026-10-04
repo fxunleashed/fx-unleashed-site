@@ -21,6 +21,7 @@ export const site = {
   firmwareApi: "https://api.github.com/repos/fxunleashed/fx-unleashed-firmware/releases/latest",
   contact: "https://github.com/fxunleashed/fx-unleashed/issues",
   discord: "https://discord.gg/P9Rz6fXrRc",
+  support: "https://paypal.me/fxunleashed", // a voluntary tip jar: nothing is unlocked by it
 };
 
 export const nav: { href: string; label: string; external?: boolean }[] = [
@@ -33,6 +34,7 @@ export const nav: { href: string; label: string; external?: boolean }[] = [
   { href: "/changelog/", label: "Changelog" },
   { href: "/faq/", label: "FAQ" },
   { href: site.discord, label: "Discord", external: true },
+  { href: site.support, label: "Support", external: true },
 ];
 
 export const disclaimer =

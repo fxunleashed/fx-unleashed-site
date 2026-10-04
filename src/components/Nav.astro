@@ -34,6 +34,12 @@ const active = (href: string) => (href === "/" ? path === "/" : path.startsWith(
   ul a[aria-current="page"] { color: #fff; box-shadow: inset 0 -2px 0 var(--red); border-radius: 0; }
   .menu { display: none; margin-left: auto; width: 42px; height: 42px; border-radius: 12px; border: 1px solid var(--line-2); background: rgba(255,255,255,0.04); flex-direction: column; gap: 6px; align-items: center; justify-content: center; cursor: pointer; }
   .menu span { width: 18px; height: 2px; background: #fff; transition: transform 0.3s; }
+  ul a, .cta { white-space: nowrap; }
+  @media (max-width: 1480px) {
+    .nav-in { gap: 18px; }
+    ul { gap: 2px; }
+    ul a { padding: 8px 9px; font-size: 12px; letter-spacing: 0.07em; }
+  }
   @media (max-width: 1200px) {
     nav { position: fixed; inset: 64px 12px auto 12px; display: none; background: rgba(10, 11, 14, 0.96); border: 1px solid var(--line); border-radius: 18px; padding: 10px; }
     nav.open { display: block; }
